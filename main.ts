@@ -23,7 +23,7 @@ export default class HelloWorldPaul extends Plugin {
             name: "Set project ids",
             editorCallback: (editor, view) => {
                 let sel = editor.getSelection();
-                const regex = /^(-\s\[ \]\s)?(.*)$/mg;
+                const regex = /^(-\s\[[ x\-\/]\]\s)?(.*)$/mg;
 
                 // Remove existing ID's
                 let remove_id = /\h?🆔\s\w+\h*/g;
@@ -48,7 +48,7 @@ export default class HelloWorldPaul extends Plugin {
 					// Is this a task line at all?
                     if (match[1]) {
                         // Add the id into there
-                        lines += `- [ ] ${match[2].trim()} 🆔 prj${idx}`;
+                        lines += `${match[1]}${match[2].trim()} 🆔 prj${idx}`;
                         if (idx > 0) {
                             // Add the blocks after the very first task
                             lines += ` ⛔ prj${idx - 1}`;
