@@ -3,11 +3,11 @@ import {App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Sett
 // Remember to rename these classes and interfaces!!
 
 interface MyPluginSettings {
-    mySetting: string;
+    projectPrefix: string;
 }
 
 const DEFAULT_SETTINGS: MyPluginSettings = {
-    mySetting: 'default'
+    projectPrefix: 'prj'
 }
 
 export default class HelloWorldPaul extends Plugin {
@@ -124,6 +124,7 @@ export default class HelloWorldPaul extends Plugin {
         let lines = "";
         let first = true;
         let idx = 0;
+        const prefix = this.settings.projectPrefix;
 
         // Go through all the lines and add appropriate ID and block tags
         for (const match of matches) {
@@ -133,10 +134,10 @@ export default class HelloWorldPaul extends Plugin {
             // Is this a task line at all?
             if (match[1]) {
                 // Add the id into there
-                lines += `${match[1]}${match[2].trim()} 🆔 prj${idx}`;
+                lines += `${match[1]}${match[2].trim()} 🆔 ${prefix}${idx}`;
                 if (idx > 0) {
                     // Add the blocks after the very first task
-                    lines += ` ⛔ prj${idx - 1}`;
+                    lines += ` ⛔ ${prefix}${idx - 1}`;
                 }
                 idx += 1;
             } else {
@@ -191,13 +192,13 @@ class SampleSettingTab extends PluginSettingTab {
         containerEl.empty();
 
         new Setting(containerEl)
-            .setName('Setting #1')
-            .setDesc('It\'s a secret')
+            .setName('Project ID prefix')
+            .setDesc('Prefix to use when creating an ID for a task')
             .addText(text => text
-                .setPlaceholder('Enter your secret')
-                .setValue(this.plugin.settings.mySetting)
+                .setPlaceholder('ID prefix')
+                .setValue(this.plugin.settings.projectPrefix)
                 .onChange(async (value) => {
-                    this.plugin.settings.mySetting = value;
+                    this.plugin.settings.projectPrefix = value;
                     await this.plugin.saveSettings();
                 }));
     }
