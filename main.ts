@@ -2,12 +2,19 @@ import {App, Editor, EditorPosition, MarkdownView, Modal, Notice, Plugin, Plugin
 
 // Remember to rename these classes and interfaces!!
 
+enum PrefixMethod {
+    UsePrefix= '1',
+    SectionName = '2',
+    FileName = '3'
+}
 
 interface MyPluginSettings {
+    idPrefixMethod: PrefixMethod;
     projectPrefix: string;
 }
 
 const DEFAULT_SETTINGS: MyPluginSettings = {
+    idPrefixMethod: PrefixMethod.UsePrefix,
     projectPrefix: 'prj'
 }
 
@@ -206,6 +213,20 @@ class SampleSettingTab extends PluginSettingTab {
         const {containerEl} = this;
 
         containerEl.empty();
+
+        new Setting(containerEl)
+            .setName('Project ID method')
+            .setDesc('Choose how the ID will be determined')
+            .addDropdown(dropDown => {
+                dropDown.addOption('1', 'Use prefix');
+                dropDown.addOption('2', 'Use Section name');
+                dropDown.addOption('3', 'Use filename')
+                .setValue(this.plugin.settings.idPrefixMethod)
+                .onChange(async (value) => {
+                    this.plugin.settings.idPrefixMethod = value as PrefixMethod;
+                    console.log(`Set to ${value}, ${this.plugin.settings.idPrefixMethod}`);
+                    await this.plugin.saveSettings();
+                })});
 
         new Setting(containerEl)
             .setName('Project ID prefix')
