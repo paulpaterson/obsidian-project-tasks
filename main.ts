@@ -2,6 +2,7 @@ import {App, Editor, EditorPosition, MarkdownView, Modal, Notice, Plugin, Plugin
 
 // Remember to rename these classes and interfaces!!
 
+
 interface MyPluginSettings {
     projectPrefix: string;
 }
@@ -10,7 +11,7 @@ const DEFAULT_SETTINGS: MyPluginSettings = {
     projectPrefix: 'prj'
 }
 
-export default class HelloWorldPaul extends Plugin {
+export default class ProjectTasks extends Plugin {
     settings: MyPluginSettings;
 
     async onload() {
@@ -194,9 +195,9 @@ class SampleModal extends Modal {
 }
 
 class SampleSettingTab extends PluginSettingTab {
-    plugin: HelloWorldPaul;
+    plugin: ProjectTasks;
 
-    constructor(app: App, plugin: HelloWorldPaul) {
+    constructor(app: App, plugin: ProjectTasks) {
         super(app, plugin);
         this.plugin = plugin;
     }
