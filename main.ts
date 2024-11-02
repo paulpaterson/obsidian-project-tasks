@@ -1,4 +1,15 @@
-import {App, Editor, EditorPosition, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting} from 'obsidian';
+import {
+    App,
+    Editor,
+    EditorPosition, MarkdownFileInfo,
+    MarkdownView,
+    Modal,
+    Notice,
+    Plugin,
+    PluginSettingTab,
+    Setting,
+    View
+} from 'obsidian';
 
 // Remember to rename these classes and interfaces!!
 
@@ -31,7 +42,7 @@ export default class ProjectTasks extends Plugin {
             name: "Set project ids on Selection",
             editorCallback: (editor, view) => {
                 let sel = editor.getSelection();
-                let lines = this.addTaskIDs(sel);
+                let lines = this.addTaskIDs(sel, this.getPrefix(editor, view));
                 new Notice(`Project tasks created from: ${sel}`);
                 editor.replaceSelection(
                     `${lines}`
@@ -56,7 +67,7 @@ export default class ProjectTasks extends Plugin {
             id: "set-ids-block",
             name: "Set project ids on Block",
             editorCallback: (editor, view) => {
-                this.blockUpdate(editor, true);
+                this.blockUpdate(editor, this.getPrefix(editor, view), true);
             }
         })
 
@@ -64,7 +75,8 @@ export default class ProjectTasks extends Plugin {
             id: "clear-ids-block",
             name: "Clear project ids on Block",
             editorCallback: (editor, view) => {
-                this.blockUpdate(editor, false);
+                this.blockUpdate(editor, this.getPrefix(editor, view), false);
+                console.log('Filename: ', view.file);
             }
         })
 
@@ -73,27 +85,21 @@ export default class ProjectTasks extends Plugin {
 
         // When registering intervals, this function will automatically clear the interval when the plugin is disabled.
         this.registerInterval(window.setInterval(() => console.log('setInterval'), 5 * 60 * 1000));
-
-
     }
 
-    blockUpdate(editor: Editor, add_ids: boolean) {
+    blockUpdate(editor: Editor, prefix: string, add_ids: boolean) {
         const cursor = editor.getCursor();
         const line = editor.getLine(cursor.line);
 
-        // Regex for block boundary
-        const block_boundary = /^#+\s/;
-
         // Get the block boundaries
-        let blockStart = this.getBlockStart(cursor, block_boundary, editor);
-        let blockEnd = this.getBlockEnd(cursor, editor, block_boundary);
+        let blockStart = this.getBlockStart(editor);
+        let blockEnd = this.getBlockEnd(editor);
 
         const blockContent = editor.getRange({ line: blockStart, ch: 0 }, { line: blockEnd, ch: line.length });
-        console.log(`The block is: ${blockContent}`);
 
         let lines;
         if (add_ids) {
-            lines = this.addTaskIDs(blockContent);
+            lines = this.addTaskIDs(blockContent, prefix);
         } else {
             lines = this.clearBlockIDs(blockContent);
         }
@@ -101,18 +107,24 @@ export default class ProjectTasks extends Plugin {
         editor.replaceRange(lines, { line: blockStart, ch: 0 }, { line: blockEnd, ch: last_line_length });
     }
 
-    private getBlockEnd(cursor: EditorPosition, editor: Editor, block_boundary: RegExp) {
+    private getBlockEnd(editor: Editor) {
+        // Regex for block boundary
+        const block_boundary = /^#+\s/;
+
         // Find the end of the block
-        let blockEnd = cursor.line;
+        let blockEnd = editor.getCursor().line;
         while (blockEnd < editor.lineCount() - 1 && !block_boundary.test(editor.getLine(blockEnd + 1))) {
             blockEnd++;
         }
         return blockEnd;
     }
 
-    private getBlockStart(cursor: EditorPosition, block_boundary: RegExp, editor: Editor) {
+    private getBlockStart(editor: Editor) {
+        // Regex for block boundary
+        const block_boundary = /^#+\s/;
+
         // Find the start of the block
-        let blockStart = cursor.line;
+        let blockStart = editor.getCursor().line;
         while (blockStart > 0 && !block_boundary.test(editor.getLine(blockStart - 1))) {
             blockStart--;
         }
@@ -131,11 +143,45 @@ export default class ProjectTasks extends Plugin {
         return sel;
     }
 
-    getPrefix() {
-        return this.settings.projectPrefix;
+    getPrefix(editor: Editor, view: MarkdownFileInfo) {
+        switch (this.settings.idPrefixMethod) {
+            case PrefixMethod.UsePrefix: {
+                return this.settings.projectPrefix;
+            }
+            case PrefixMethod.FileName: {
+                if (!view.file?.name) {
+                    return this.settings.projectPrefix;
+                } else {
+                    return view.file.name.replaceAll(' ', '').split('.')[0];
+                }
+            }
+            case PrefixMethod.SectionName: {
+                // Regex for block boundary
+                const block_boundary = /^#+\s/;
+
+                let section_start = this.getBlockStart(editor);
+                let section_line;
+                if (section_start == 0) {
+                    section_line = "";
+                } else {
+                    section_line = editor.getLine(section_start-1);
+                }
+                console.log('Prefix check .. Found section: ', section_start, section_line);
+                if (block_boundary.test(section_line)) {
+                    return section_line.replaceAll(' ', '').replaceAll('#', '');
+                } else {
+                    // Return the filename anyway
+                    if (!view.file?.name) {
+                        return this.settings.projectPrefix;
+                    } else {
+                        return view.file.name.replaceAll(' ', '').split('.')[0];
+                    }
+                }
+            }
+        }
     }
 
-    addTaskIDs(sel: string) {
+    addTaskIDs(sel: string, prefix: string) {
         const regex = /^(-\s\[[ x\-\/]\]\s)?(.*)$/mg;
 
         // Clear all the existing block and project ID's
@@ -147,7 +193,6 @@ export default class ProjectTasks extends Plugin {
         let lines = "";
         let first = true;
         let idx = 0;
-        const prefix = this.getPrefix();
 
         // Go through all the lines and add appropriate ID and block tags
         for (const match of matches) {
