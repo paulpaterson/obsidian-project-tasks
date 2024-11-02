@@ -96,7 +96,8 @@ export default class HelloWorldPaul extends Plugin {
         } else {
             lines = this.clearBlockIDs(blockContent);
         }
-        editor.replaceRange(lines, { line: blockStart, ch: 0 }, { line: blockEnd, ch: line.length });
+        let last_line_length = editor.getLine(blockEnd).length;
+        editor.replaceRange(lines, { line: blockStart, ch: 0 }, { line: blockEnd, ch: last_line_length });
     }
 
     clearBlockIDs(sel: string) {
