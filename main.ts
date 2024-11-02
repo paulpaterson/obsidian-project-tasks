@@ -22,27 +22,45 @@ export default class HelloWorldPaul extends Plugin {
             id: "set-ids",
             name: "Set project ids",
             editorCallback: (editor, view) => {
-                const sel = editor.getSelection();
-                const regex = /^(-\s\[ \]\s)?(.*?)(\s🆔\s\w+)?(\s⛔\s\w+)?(.*)$/mg;
-                const matches = sel.matchAll(regex);
+                let sel = editor.getSelection();
+                const regex = /^(-\s\[ \]\s)?(.*)$/mg;
 
+                // Remove existing ID's
+                let remove_id = /\h?🆔\s\w+\h*/g;
+                sel = sel.replaceAll(remove_id, '');
+
+                // Remove existing Blocks
+                let remove_block = /\h?⛔\s\w+\h*/g;
+                sel = sel.replaceAll(remove_block, '');
+
+                console.log(`Replaced ids and blocks to give: ${sel}`);
+
+                const matches = sel.matchAll(regex);
                 let lines = "";
+                let first = true;
                 let idx = 0;
+
+                // Go through all the lines and add appropriate ID and block tags
                 for (const match of matches) {
-                    console.log("Matches:", match);
-                    if (idx > 0) {
+                    if (!first) {
                         lines += "\n";
                     }
+					// Is this a task line at all?
                     if (match[1]) {
-                        lines += `- [ ] ${match[2]} 🆔 prj${idx}${match[5]}`;
+                        // Add the id into there
+                        lines += `- [ ] ${match[2].trim()} 🆔 prj${idx}`;
                         if (idx > 0) {
+                            // Add the blocks after the very first task
                             lines += ` ⛔ prj${idx - 1}`;
                         }
+                        idx += 1;
                     } else {
-                        lines += `${match[2]}`;
+						// Not a task line so just keep it as is
+                        lines += `${match[2].trim()}`;
                     }
-                    idx += 1;
+                    first = false;
                 }
+
                 new Notice(`Project tasks created from: ${sel}`);
                 editor.replaceSelection(
                     `${lines}`
