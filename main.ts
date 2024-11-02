@@ -1,4 +1,4 @@
-import {App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting} from 'obsidian';
+import {App, Editor, EditorPosition, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting} from 'obsidian';
 
 // Remember to rename these classes and interfaces!!
 
@@ -76,16 +76,9 @@ export default class HelloWorldPaul extends Plugin {
         // Regex for block boundary
         const block_boundary = /^#+\s/;
 
-        // Find the start of the block
-        let blockStart = cursor.line;
-        while (blockStart > 0 && !block_boundary.test(editor.getLine(blockStart - 1))) {
-        blockStart--;
-        }
-        // Find the end of the block
-        let blockEnd = cursor.line;
-        while (blockEnd < editor.lineCount() - 1 && !block_boundary.test(editor.getLine(blockEnd + 1))) {
-        blockEnd++;
-        }
+        // Get the block boundaries
+        let blockStart = this.getBlockStart(cursor, block_boundary, editor);
+        let blockEnd = this.getBlockEnd(cursor, editor, block_boundary);
 
         const blockContent = editor.getRange({ line: blockStart, ch: 0 }, { line: blockEnd, ch: line.length });
         console.log(`The block is: ${blockContent}`);
@@ -100,6 +93,24 @@ export default class HelloWorldPaul extends Plugin {
         editor.replaceRange(lines, { line: blockStart, ch: 0 }, { line: blockEnd, ch: last_line_length });
     }
 
+    private getBlockEnd(cursor: EditorPosition, editor: Editor, block_boundary: RegExp) {
+        // Find the end of the block
+        let blockEnd = cursor.line;
+        while (blockEnd < editor.lineCount() - 1 && !block_boundary.test(editor.getLine(blockEnd + 1))) {
+            blockEnd++;
+        }
+        return blockEnd;
+    }
+
+    private getBlockStart(cursor: EditorPosition, block_boundary: RegExp, editor: Editor) {
+        // Find the start of the block
+        let blockStart = cursor.line;
+        while (blockStart > 0 && !block_boundary.test(editor.getLine(blockStart - 1))) {
+            blockStart--;
+        }
+        return blockStart;
+    }
+
     clearBlockIDs(sel: string) {
         // Remove existing ID's
         let remove_id = /\h?🆔\s\w+\h*/g;
@@ -110,6 +121,10 @@ export default class HelloWorldPaul extends Plugin {
         sel = sel.replaceAll(remove_block, '');
 
         return sel;
+    }
+
+    getPrefix() {
+        return this.settings.projectPrefix;
     }
 
     addTaskIDs(sel: string) {
@@ -124,7 +139,7 @@ export default class HelloWorldPaul extends Plugin {
         let lines = "";
         let first = true;
         let idx = 0;
-        const prefix = this.settings.projectPrefix;
+        const prefix = this.getPrefix();
 
         // Go through all the lines and add appropriate ID and block tags
         for (const match of matches) {
