@@ -15,8 +15,7 @@ import {
 const DEBUG = true;
 // Regex for block boundary
 const BLOCK_BOUNDARY = /^#+\s/;
-// Number of digits to use for a random prefix
-const RANDOM_LENGTH = 6;
+
 
 
 enum PrefixMethod {
@@ -28,11 +27,13 @@ enum PrefixMethod {
 interface MyPluginSettings {
     idPrefixMethod: PrefixMethod;
     projectPrefix: string;
+    randomIDLength: number;
 }
 
 const DEFAULT_SETTINGS: MyPluginSettings = {
     idPrefixMethod: PrefixMethod.UsePrefix,
-    projectPrefix: 'prj'
+    projectPrefix: 'prj',
+    randomIDLength: 6
 }
 
 export default class ProjectTasks extends Plugin {
@@ -230,7 +231,7 @@ export default class ProjectTasks extends Plugin {
             if (match[1]) {
                 // Get an id to use
                 if (this.settings.idPrefixMethod == PrefixMethod.UsePrefix) {
-                    this_id = this.generateRandomDigits(RANDOM_LENGTH);
+                    this_id = this.generateRandomDigits(this.settings.randomIDLength);
                 } else {
                     this_id = `${idx}`;
                 }
@@ -314,6 +315,18 @@ class SampleSettingTab extends PluginSettingTab {
                 .setValue(this.plugin.settings.projectPrefix)
                 .onChange(async (value) => {
                     this.plugin.settings.projectPrefix = value;
+                    await this.plugin.saveSettings();
+                }));
+
+        new Setting(containerEl)
+            .setName('Length of random ID number')
+            .setDesc('How many digits to use for random ID when using a fixed prefix')
+            .addSlider(text => text
+                .setValue(this.plugin.settings.randomIDLength)
+                .setLimits(3, 6, 1)
+                .setDynamicTooltip()
+                .onChange(async (value) => {
+                    this.plugin.settings.randomIDLength = value;
                     await this.plugin.saveSettings();
                 }));
     }
