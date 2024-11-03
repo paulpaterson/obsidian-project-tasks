@@ -76,7 +76,6 @@ export default class ProjectTasks extends Plugin {
             name: "Clear project ids on Block",
             editorCallback: (editor, view) => {
                 this.blockUpdate(editor, this.getPrefix(editor, view), false);
-                console.log('Filename: ', view.file);
             }
         })
 
@@ -94,8 +93,9 @@ export default class ProjectTasks extends Plugin {
         // Get the block boundaries
         let blockStart = this.getBlockStart(editor);
         let blockEnd = this.getBlockEnd(editor);
+        let last_line_length = editor.getLine(blockEnd + 1).length;
 
-        const blockContent = editor.getRange({ line: blockStart, ch: 0 }, { line: blockEnd, ch: line.length });
+        const blockContent = editor.getRange({ line: blockStart, ch: 0 }, { line: blockEnd, ch: last_line_length });
 
         let lines;
         if (add_ids) {
@@ -103,7 +103,8 @@ export default class ProjectTasks extends Plugin {
         } else {
             lines = this.clearBlockIDs(blockContent);
         }
-        let last_line_length = editor.getLine(blockEnd).length;
+
+        console.log(`Start ${blockStart}, End ${blockEnd}, last length ${last_line_length}\nOrig: ${blockContent}\nNew: ${lines}`);
         editor.replaceRange(lines, { line: blockStart, ch: 0 }, { line: blockEnd, ch: last_line_length });
     }
 
