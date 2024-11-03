@@ -41,7 +41,7 @@ const DEFAULT_SETTINGS: ProjectTasksSettings = {
     sequentialStartNumber: 1,
     removeVowels: false,
     firstLettersOfWords: false,
-    automaticTagName: "",
+    automaticTagName: "Project",
 }
 
 export default class ProjectTasks extends Plugin {

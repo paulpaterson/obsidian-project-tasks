@@ -21,7 +21,7 @@ This plugin requires the [Tasks](https://github.com/obsidian-tasks-group/obsidia
 - Associate project specific tags
 - All existing task functionality like due dates, recurrence
 - Tasks continue to work on vaults that do not have the plugin installed
-- (Optional) Useful dataviews to show project tasks that are due now
+- Use dataviews to show project tasks that are due now
 - (Future) Supports parallel task execution
 - (Future) Supports optional and conditional tasks
 
@@ -58,9 +58,38 @@ Adds task ID's and dependencies (before and after links) to a series of tasks. T
 
 The tasks are now linked as a sequential set. All tasks except the first will be blocked until the first one is completed. When the first task is completed it then unblocks the other tasks.
 
-TODO: Show the blocking and unblocking
-
 The format of the project ID's can be controlled using the [Options](#options)
+
+### Project Views
+
+By adding tags to the tasks you can also use the Project View, which is useful to show the currently active tasks. Only tasks that are active, due and not blocked by other tasks will be shown.
+
+You can configure the tag to be added to the tasks in the [Options](#options).
+
+Tasks with tags look like this.
+
+![](docs/task-with-tag.png)
+
+You can then create a view to see only the active tasks.
+
+![](docs/add-project-task-list.gif)
+
+As you complete tasks in the project the next task up becomes available and you can see this in the view you just created.
+
+![](docs/checking-off-tasks.gif)
+
+You can have the view in any file, it doesn't have to be in the one where the tasks are.
+
+You can customize your own views just using the following block.
+
+```
+'''tasks
+tags includes #INSERT_TAG_NAME
+not done
+hide backlink
+is not blocked
+'''
+```
 
 ### Clear Task ID's
 
@@ -94,6 +123,9 @@ The corresponding commands for clearing project ids are:
 - Command: clear-ids-file
 ```
 
+
+
+
 ## Options
 
 ### Controlling the form of the Project ID
@@ -117,5 +149,10 @@ When using the section or file name option for the prefix then some other option
 1. Remove vowels - lower case vowels are removed from the prefix
 2. First letters of words - the prefix is split into words and the first letters are used. The letters are capitalized
 
+### Adding a project tag
+
+You can use the project tag option to automatically add a tag to all tasks in the project. This allows you to use [Project Views](#project-views).
+
+The tag will be added to all tags and will be cleared if you use the ```clear-ids``` command.
 
 
