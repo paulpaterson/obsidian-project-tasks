@@ -11,7 +11,7 @@ import {
     View
 } from 'obsidian';
 
-// Remember to rename these classes and interfaces!!
+const DEBUG = true;
 
 enum PrefixMethod {
     UsePrefix= '1',
@@ -33,7 +33,7 @@ export default class ProjectTasks extends Plugin {
     settings: MyPluginSettings;
 
     async onload() {
-        console.log('Project Tasks starting');
+        if (DEBUG) console.log('Project Tasks starting');
 
         await this.loadSettings();
 
@@ -104,7 +104,7 @@ export default class ProjectTasks extends Plugin {
             lines = this.clearBlockIDs(blockContent);
         }
 
-        console.log(`Start ${blockStart}, End ${blockEnd}, last length ${last_line_length}\nOrig: ${blockContent}\nNew: ${lines}`);
+        if (DEBUG) console.log(`Start ${blockStart}, End ${blockEnd}, last length ${last_line_length}\nOrig: ${blockContent}\nNew: ${lines}`);
         editor.replaceRange(lines, { line: blockStart, ch: 0 }, { line: blockEnd, ch: last_line_length });
     }
 
@@ -167,7 +167,7 @@ export default class ProjectTasks extends Plugin {
                 } else {
                     section_line = editor.getLine(section_start-1);
                 }
-                console.log('Prefix check .. Found section: ', section_start, section_line);
+                if (DEBUG) console.log('Prefix check .. Found section: ', section_start, section_line);
                 if (block_boundary.test(section_line)) {
                     return section_line.replaceAll(' ', '').replaceAll('#', '');
                 } else {
@@ -188,7 +188,7 @@ export default class ProjectTasks extends Plugin {
         // Clear all the existing block and project ID's
         sel = this.clearBlockIDs(sel);
 
-        console.log(`Replaced ids and blocks to give: ${sel}`);
+        if (DEBUG) console.log(`Replaced ids and blocks to give: ${sel}`);
 
         const matches = sel.matchAll(regex);
         let lines = "";
@@ -270,7 +270,6 @@ class SampleSettingTab extends PluginSettingTab {
                 .setValue(this.plugin.settings.idPrefixMethod)
                 .onChange(async (value) => {
                     this.plugin.settings.idPrefixMethod = value as PrefixMethod;
-                    console.log(`Set to ${value}, ${this.plugin.settings.idPrefixMethod}`);
                     await this.plugin.saveSettings();
                 })});
 
