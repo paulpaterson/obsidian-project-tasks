@@ -28,6 +28,7 @@ interface ProjectTasksSettings {
     idPrefixMethod: PrefixMethod;
     projectPrefix: string;
     randomIDLength: number;
+    sequentialStartNumber: number;
     removeVowels: boolean;
     firstLettersOfWords: boolean;
 }
@@ -36,6 +37,7 @@ const DEFAULT_SETTINGS: ProjectTasksSettings = {
     idPrefixMethod: PrefixMethod.UsePrefix,
     projectPrefix: 'prj',
     randomIDLength: 6,
+    sequentialStartNumber: 1,
     removeVowels: false,
     firstLettersOfWords: false
 }
@@ -251,7 +253,7 @@ export default class ProjectTasks extends Plugin {
                 if (this.settings.idPrefixMethod == PrefixMethod.UsePrefix) {
                     this_id = this.generateRandomDigits(this.settings.randomIDLength);
                 } else {
-                    this_id = `${idx}`;
+                    this_id = `${idx + this.settings.sequentialStartNumber}`;
                 }
                 // Add the id into there
                 lines += `${match[1]}${match[2].trim()} 🆔 ${prefix}${this_id}`;
@@ -330,6 +332,18 @@ class ProjectTasksSettingsTab extends PluginSettingTab {
                 .setDynamicTooltip()
                 .onChange(async (value) => {
                     this.plugin.settings.randomIDLength = value;
+                    await this.plugin.saveSettings();
+                }));
+
+        new Setting(containerEl)
+            .setName('Initial sequential ID number')
+            .setDesc('Start number for sequential ID\'s')
+            .addSlider(text => text
+                .setValue(this.plugin.settings.sequentialStartNumber)
+                .setLimits(0, 1, 1)
+                .setDynamicTooltip()
+                .onChange(async (value) => {
+                    this.plugin.settings.sequentialStartNumber = value;
                     await this.plugin.saveSettings();
                 }));
 
