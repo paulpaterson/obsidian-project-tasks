@@ -1,5 +1,5 @@
 {
-  "idPrefixMethod": "1",
+  "idPrefixMethod": "2",
   "projectPrefix": "prj",
   "randomIDLength": 3,
   "removeVowels": true,

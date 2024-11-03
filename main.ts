@@ -91,8 +91,6 @@ export default class ProjectTasks extends Plugin {
         // This adds a settings tab so the user can configure various aspects of the plugin
         this.addSettingTab(new ProjectTasksSettingsTab(this.app, this));
 
-        // When registering intervals, this function will automatically clear the interval when the plugin is disabled.
-        this.registerInterval(window.setInterval(() => console.log('setInterval'), 5 * 60 * 1000));
     }
 
     blockUpdate(editor: Editor, prefix: string, add_ids: boolean) {
@@ -285,21 +283,6 @@ export default class ProjectTasks extends Plugin {
     }
 }
 
-class SampleModal extends Modal {
-    constructor(app: App) {
-        super(app);
-    }
-
-    onOpen() {
-        const {contentEl} = this;
-        contentEl.setText('Woah!');
-    }
-
-    onClose() {
-        const {contentEl} = this;
-        contentEl.empty();
-    }
-}
 
 class ProjectTasksSettingsTab extends PluginSettingTab {
     plugin: ProjectTasks;
