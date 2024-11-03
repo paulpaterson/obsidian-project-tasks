@@ -11,7 +11,11 @@ import {
     View
 } from 'obsidian';
 
+// Turn on to allow debugging in the console
 const DEBUG = true;
+// Regex for block boundary
+const BLOCK_BOUNDARY = /^#+\s/;
+
 
 enum PrefixMethod {
     UsePrefix= '1',
@@ -109,24 +113,18 @@ export default class ProjectTasks extends Plugin {
     }
 
     private getBlockEnd(editor: Editor) {
-        // Regex for block boundary
-        const block_boundary = /^#+\s/;
-
         // Find the end of the block
         let blockEnd = editor.getCursor().line;
-        while (blockEnd < editor.lineCount() - 1 && !block_boundary.test(editor.getLine(blockEnd + 1))) {
+        while (blockEnd < editor.lineCount() - 1 && !BLOCK_BOUNDARY.test(editor.getLine(blockEnd + 1))) {
             blockEnd++;
         }
         return blockEnd;
     }
 
     private getBlockStart(editor: Editor) {
-        // Regex for block boundary
-        const block_boundary = /^#+\s/;
-
         // Find the start of the block
         let blockStart = editor.getCursor().line;
-        while (blockStart > 0 && !block_boundary.test(editor.getLine(blockStart - 1))) {
+        while (blockStart > 0 && !BLOCK_BOUNDARY.test(editor.getLine(blockStart - 1))) {
             blockStart--;
         }
         return blockStart;
@@ -157,9 +155,6 @@ export default class ProjectTasks extends Plugin {
                 }
             }
             case PrefixMethod.SectionName: {
-                // Regex for block boundary
-                const block_boundary = /^#+\s/;
-
                 let section_start = this.getBlockStart(editor);
                 let section_line;
                 if (section_start == 0) {
@@ -168,7 +163,7 @@ export default class ProjectTasks extends Plugin {
                     section_line = editor.getLine(section_start-1);
                 }
                 if (DEBUG) console.log('Prefix check .. Found section: ', section_start, section_line);
-                if (block_boundary.test(section_line)) {
+                if (BLOCK_BOUNDARY.test(section_line)) {
                     return section_line.replaceAll(' ', '').replaceAll('#', '');
                 } else {
                     // Return the filename anyway
