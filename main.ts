@@ -121,8 +121,9 @@ export default class ProjectTasks extends Plugin {
     private getBlockEnd(editor: Editor) {
         // Find the end of the block
         let blockEnd = editor.getCursor().line;
-        while (blockEnd < editor.lineCount() - 1 && !BLOCK_BOUNDARY.test(editor.getLine(blockEnd + 1))) {
+        while (!BLOCK_BOUNDARY.test(editor.getLine(blockEnd))) {
             blockEnd++;
+            if (blockEnd > editor.lineCount() - 1) return blockEnd;
         }
         return blockEnd;
     }
