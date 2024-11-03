@@ -28,12 +28,14 @@ interface MyPluginSettings {
     idPrefixMethod: PrefixMethod;
     projectPrefix: string;
     randomIDLength: number;
+    removeVowels: boolean;
 }
 
 const DEFAULT_SETTINGS: MyPluginSettings = {
     idPrefixMethod: PrefixMethod.UsePrefix,
     projectPrefix: 'prj',
-    randomIDLength: 6
+    randomIDLength: 6,
+    removeVowels: false
 }
 
 export default class ProjectTasks extends Plugin {
@@ -203,7 +205,10 @@ export default class ProjectTasks extends Plugin {
         text = text.replaceAll("#", '');
         // Remove spaces
         text = text.replaceAll(' ', '');
-
+        // Remove vowels if needed
+        if (this.settings.removeVowels) {
+            text = text.replaceAll(/[aeiou]/g, '');
+        }
         return text;
     }
 
@@ -327,6 +332,16 @@ class SampleSettingTab extends PluginSettingTab {
                 .setDynamicTooltip()
                 .onChange(async (value) => {
                     this.plugin.settings.randomIDLength = value;
+                    await this.plugin.saveSettings();
+                }));
+
+        new Setting(containerEl)
+            .setName('Remove vowels')
+            .setDesc('Remove vowels from the prefix when getting from the filename or block name')
+            .addToggle(text => text
+                .setValue(this.plugin.settings.removeVowels)
+                .onChange(async (value) => {
+                    this.plugin.settings.removeVowels = value;
                     await this.plugin.saveSettings();
                 }));
     }
