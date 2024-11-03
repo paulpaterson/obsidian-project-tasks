@@ -31,6 +31,7 @@ interface ProjectTasksSettings {
     sequentialStartNumber: number;
     removeVowels: boolean;
     firstLettersOfWords: boolean;
+    automaticTagName: string;
 }
 
 const DEFAULT_SETTINGS: ProjectTasksSettings = {
@@ -39,7 +40,8 @@ const DEFAULT_SETTINGS: ProjectTasksSettings = {
     randomIDLength: 6,
     sequentialStartNumber: 1,
     removeVowels: false,
-    firstLettersOfWords: false
+    firstLettersOfWords: false,
+    automaticTagName: "",
 }
 
 export default class ProjectTasks extends Plugin {
@@ -158,6 +160,12 @@ export default class ProjectTasks extends Plugin {
         let remove_block = /\h?⛔\s\w+\h*/g;
         sel = sel.replaceAll(remove_block, '');
 
+        // Remove existing tags
+        if (this.settings.automaticTagName) {
+            let remove_tag = new RegExp("^(-\\s\\[[ x\\-\\/]\]\\s.*)(#" + this.settings.automaticTagName + ")(.*)$", "mg");
+            sel = sel.replaceAll(remove_tag, '$1 $3');
+        }
+
         return sel;
     }
 
@@ -249,6 +257,7 @@ export default class ProjectTasks extends Plugin {
             }
             // Is this a task line at all?
             if (match[1]) {
+                let this_line;
                 // Get an id to use
                 if (this.settings.idPrefixMethod == PrefixMethod.UsePrefix) {
                     this_id = this.generateRandomDigits(this.settings.randomIDLength);
@@ -256,11 +265,19 @@ export default class ProjectTasks extends Plugin {
                     this_id = `${idx + this.settings.sequentialStartNumber}`;
                 }
                 // Add the id into there
-                lines += `${match[1]}${match[2].trim()} 🆔 ${prefix}${this_id}`;
+                this_line = `${match[1]}${match[2].trim()} 🆔 ${prefix}${this_id}`;
                 if (idx > 0) {
                     // Add the blocks after the very first task
-                    lines += ` ⛔ ${prefix}${last_id}`;
+                    this_line += ` ⛔ ${prefix}${last_id}`;
                 }
+
+                // Add an automatic tag if we need it
+                if (this.settings.automaticTagName) {
+                    this_line += ` #${this.settings.automaticTagName}`;
+                }
+
+                // Append this line
+                lines += this_line;
                 idx += 1;
                 last_id = this_id;
             } else {
@@ -364,6 +381,17 @@ class ProjectTasksSettingsTab extends PluginSettingTab {
                 .setValue(this.plugin.settings.firstLettersOfWords)
                 .onChange(async (value) => {
                     this.plugin.settings.firstLettersOfWords = value;
+                    await this.plugin.saveSettings();
+                }));
+
+        new Setting(containerEl)
+            .setName('Automatically add Tag')
+            .setDesc('A tag to add to each task - do not include the # symbol')
+            .addText(text => text
+                .setValue(this.plugin.settings.automaticTagName)
+                .setPlaceholder("Tag Name")
+                .onChange(async (value) => {
+                    this.plugin.settings.automaticTagName = value.replaceAll('#', '');
                     await this.plugin.saveSettings();
                 }));
     }
