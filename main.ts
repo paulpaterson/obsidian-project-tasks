@@ -92,9 +92,28 @@ export default class ProjectTasks extends Plugin {
             }
         })
 
+        this.addCommand({
+            id: "add-project-task-list",
+            name: "Add active project task list",
+            editorCallback: (editor, view) => {
+                this.addActiveProjectList(editor);
+            }
+        })
+
         // This adds a settings tab so the user can configure various aspects of the plugin
         this.addSettingTab(new ProjectTasksSettingsTab(this.app, this));
 
+    }
+
+    addActiveProjectList(editor: Editor) {
+        // A view to show active tasks
+        const active_tasks_view = `\`\`\`tasks
+tags includes #${this.settings.automaticTagName}
+not done
+hide backlink
+is not blocked
+\`\`\``;
+        editor.replaceSelection(active_tasks_view);
     }
 
     blockUpdate(editor: Editor, prefix: string, add_ids: boolean) {
