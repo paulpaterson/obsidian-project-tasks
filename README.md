@@ -16,7 +16,7 @@ This plugin requires the [Tasks](https://github.com/obsidian-tasks-group/obsidia
 
 ## Key Highlights
 
-- Automatically Task ID's 
+- Automatically create and manage Task ID's 
 - Create and manage Task dependencies
 - Associate project specific tags
 - All existing task functionality like due dates, recurrence
