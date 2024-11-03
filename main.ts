@@ -24,7 +24,7 @@ enum PrefixMethod {
     FileName = '3'
 }
 
-interface MyPluginSettings {
+interface ProjectTasksSettings {
     idPrefixMethod: PrefixMethod;
     projectPrefix: string;
     randomIDLength: number;
@@ -32,7 +32,7 @@ interface MyPluginSettings {
     firstLettersOfWords: boolean;
 }
 
-const DEFAULT_SETTINGS: MyPluginSettings = {
+const DEFAULT_SETTINGS: ProjectTasksSettings = {
     idPrefixMethod: PrefixMethod.UsePrefix,
     projectPrefix: 'prj',
     randomIDLength: 6,
@@ -41,7 +41,7 @@ const DEFAULT_SETTINGS: MyPluginSettings = {
 }
 
 export default class ProjectTasks extends Plugin {
-    settings: MyPluginSettings;
+    settings: ProjectTasksSettings;
 
     async onload() {
         if (DEBUG) console.log('Project Tasks starting');
