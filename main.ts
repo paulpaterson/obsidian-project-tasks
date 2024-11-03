@@ -15,6 +15,8 @@ import {
 const DEBUG = true;
 // Regex for block boundary
 const BLOCK_BOUNDARY = /^#+\s/;
+// Number of digits to use for a random prefix
+const RANDOM_LENGTH = 6;
 
 
 enum PrefixMethod {
@@ -47,7 +49,6 @@ export default class ProjectTasks extends Plugin {
             editorCallback: (editor, view) => {
                 let sel = editor.getSelection();
                 let lines = this.addTaskIDs(sel, this.getPrefix(editor, view));
-                new Notice(`Project tasks created from: ${sel}`);
                 editor.replaceSelection(
                     `${lines}`
                 );
@@ -60,7 +61,6 @@ export default class ProjectTasks extends Plugin {
             editorCallback: (editor, view) => {
                 let sel = editor.getSelection();
                 let lines = this.clearBlockIDs(sel);
-                new Notice(`Project tasks cleared from: ${sel}`);
                 editor.replaceSelection(
                     `${lines}`
                 );
@@ -97,7 +97,7 @@ export default class ProjectTasks extends Plugin {
         // Get the block boundaries
         let blockStart = this.getBlockStart(editor);
         let blockEnd = this.getBlockEnd(editor);
-        let last_line_length = editor.getLine(blockEnd + 1).length + 1;
+        let last_line_length = editor.getLine(blockEnd + 1).length;
 
         const blockContent = editor.getRange({ line: blockStart, ch: 0 }, { line: blockEnd, ch: last_line_length });
 
@@ -128,6 +128,18 @@ export default class ProjectTasks extends Plugin {
             blockStart--;
         }
         return blockStart;
+    }
+
+    generateRandomDigits(length: number): string {
+      const digits = '0123456789';
+      let randomString = '';
+
+      for (let i = 0; i < length; i++) {
+        const randomIndex = Math.floor(Math.random() * digits.length);
+        randomString += digits[randomIndex];
+      }
+
+      return randomString;
     }
 
     clearBlockIDs(sel: string) {
@@ -206,6 +218,8 @@ export default class ProjectTasks extends Plugin {
         let lines = "";
         let first = true;
         let idx = 0;
+        let this_id;
+        let last_id;
 
         // Go through all the lines and add appropriate ID and block tags
         for (const match of matches) {
@@ -214,13 +228,20 @@ export default class ProjectTasks extends Plugin {
             }
             // Is this a task line at all?
             if (match[1]) {
+                // Get an id to use
+                if (this.settings.idPrefixMethod == PrefixMethod.UsePrefix) {
+                    this_id = this.generateRandomDigits(RANDOM_LENGTH);
+                } else {
+                    this_id = `${idx}`;
+                }
                 // Add the id into there
-                lines += `${match[1]}${match[2].trim()} 🆔 ${prefix}${idx}`;
+                lines += `${match[1]}${match[2].trim()} 🆔 ${prefix}${this_id}`;
                 if (idx > 0) {
                     // Add the blocks after the very first task
-                    lines += ` ⛔ ${prefix}${idx - 1}`;
+                    lines += ` ⛔ ${prefix}${last_id}`;
                 }
                 idx += 1;
+                last_id = this_id;
             } else {
                 // Not a task line so just keep it as is
                 lines += `${match[2].trim()}`;
