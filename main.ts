@@ -205,8 +205,8 @@ export default class ProjectTasks extends Plugin {
     }
 
     getPrefixFromString(text: string) {
-        // Remove any # signs
-        text = text.replaceAll("#", '');
+        // Remove any special signs
+        text = text.replaceAll(/[#\[\]]/g, '');
         // Only use the first letters of words if needed
         if (this.settings.firstLettersOfWords) {
             let words = text.split(/\s+/);
