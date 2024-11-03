@@ -97,7 +97,7 @@ export default class ProjectTasks extends Plugin {
         // Get the block boundaries
         let blockStart = this.getBlockStart(editor);
         let blockEnd = this.getBlockEnd(editor);
-        let last_line_length = editor.getLine(blockEnd + 1).length;
+        let last_line_length = editor.getLine(blockEnd + 1).length + 1;
 
         const blockContent = editor.getRange({ line: blockStart, ch: 0 }, { line: blockEnd, ch: last_line_length });
 
@@ -143,18 +143,18 @@ export default class ProjectTasks extends Plugin {
     }
 
     getPrefix(editor: Editor, view: MarkdownFileInfo) {
+        let raw_prefix;
         switch (this.settings.idPrefixMethod) {
             case PrefixMethod.UsePrefix: {
-                return this.settings.projectPrefix;
+                raw_prefix = this.settings.projectPrefix;
+                break;
             }
             case PrefixMethod.FileName: {
-                if (!view.file?.name) {
-                    return this.settings.projectPrefix;
-                } else {
-                    return view.file.name.replaceAll(' ', '').split('.')[0];
-                }
+                raw_prefix = this.getFilename(view);
+                break;
             }
             case PrefixMethod.SectionName: {
+                // Try to find the name of the block that contains the cursor or the selection
                 let section_start = this.getBlockStart(editor);
                 let section_line;
                 if (section_start == 0) {
@@ -163,18 +163,35 @@ export default class ProjectTasks extends Plugin {
                     section_line = editor.getLine(section_start-1);
                 }
                 if (DEBUG) console.log('Prefix check .. Found section: ', section_start, section_line);
+
+                // Is there a block at all or are we just in a file with no blocks
                 if (BLOCK_BOUNDARY.test(section_line)) {
-                    return section_line.replaceAll(' ', '').replaceAll('#', '');
+                    raw_prefix = section_line;
                 } else {
                     // Return the filename anyway
-                    if (!view.file?.name) {
-                        return this.settings.projectPrefix;
-                    } else {
-                        return view.file.name.replaceAll(' ', '').split('.')[0];
-                    }
+                    raw_prefix = this.getFilename(view);
                 }
+                break;
             }
         }
+        return this.getPrefixFromString(raw_prefix);
+    }
+
+    getFilename(view: MarkdownFileInfo) {
+       if (!view.file?.name) {
+            return this.settings.projectPrefix;
+        } else {
+            return view.file.name.split('.')[0];
+        }
+    }
+
+    getPrefixFromString(text: string) {
+        // Remove any # signs
+        text = text.replaceAll("#", '');
+        // Remove spaces
+        text = text.replaceAll(' ', '');
+
+        return text;
     }
 
     addTaskIDs(sel: string, prefix: string) {
