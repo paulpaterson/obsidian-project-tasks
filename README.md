@@ -16,7 +16,7 @@ This plugin requires the [Tasks](https://github.com/obsidian-tasks-group/obsidia
 
 ## Key Highlights
 
-- Automatically set Task ID's 
+- Automatically Task ID's 
 - Create and manage Task dependencies
 - Associate project specific tags
 - All existing task functionality like due dates, recurrence
@@ -37,6 +37,15 @@ Additionally, you can clone this repository into your Vault/.obsidian/plugins di
 
 The plugin comprises a number of Obsidian commands which can be executed from the Command Palette or bound to hotkeys.
 
+The actions relate to task ID's and dependencies:
+
+![](docs/task-example.png)
+
+- The word after the 🆔 identifies the task ID
+- The word after the ⛔ identifies the dependency
+
+For a general description of how dependencies work, see the [Tasks documentation](https://publish.obsidian.md/tasks/Getting+Started/Task+Dependencies). This plugin just automates a common use case to make it easier to use.
+
 There are two core commands and a number of variants that adjust the scope of the "project".
 
 ### Add Task ID's
@@ -45,9 +54,13 @@ Adds task ID's and dependencies (before and after links) to a series of tasks. T
 
 ```Command: set-ids```
 
-TODO: insert gif of change
+![](docs/set-ids-command.gif)
 
-The format of the project ID's can be controlled using the [[README#Options]].
+The tasks are now linked as a sequential set. All tasks except the first will be blocked until the first one is completed. When the first task is completed it then unblocks the other tasks.
+
+TODO: Show the blocking and unblocking
+
+The format of the project ID's can be controlled using the [Options](#options)
 
 ### Clear Task ID's
 
@@ -55,7 +68,7 @@ Removes all task ID's and dependencies from all tasks. You can use this if you w
 
 ```Command: clear-ids```
 
-TODO: insert gif of change
+![](docs/clear-ids-command.gif)
 
 ### Scopes
 
@@ -87,7 +100,9 @@ The corresponding commands for clearing project ids are:
 
 The ID added to the task by the ```set-ids``` commands can be adjusted to match your own preference using the ```Project ID method``` option. All ID's are of the form of a prefix followed by a number.
 
-TODO: image of Project ID
+![](docs/task-example.png)
+
+In this example the prefix is **BNC** and the number is **1**.
 
 Long ID's tend to look a bit cumbersome in Obsidian and so these options are intended to help you create ID's which are short, unique but still understandable. These options are purely cosmetic, they don't impact how the tasks work. However, it is possible to create some non-unique ID's and currently the plugin doesn't check for that!
 
