@@ -29,13 +29,15 @@ interface MyPluginSettings {
     projectPrefix: string;
     randomIDLength: number;
     removeVowels: boolean;
+    firstLettersOfWords: boolean;
 }
 
 const DEFAULT_SETTINGS: MyPluginSettings = {
     idPrefixMethod: PrefixMethod.UsePrefix,
     projectPrefix: 'prj',
     randomIDLength: 6,
-    removeVowels: false
+    removeVowels: false,
+    firstLettersOfWords: false
 }
 
 export default class ProjectTasks extends Plugin {
@@ -103,6 +105,7 @@ export default class ProjectTasks extends Plugin {
         let last_line_length = editor.getLine(blockEnd + 1).length;
 
         const blockContent = editor.getRange({ line: blockStart, ch: 0 }, { line: blockEnd, ch: last_line_length });
+        if (DEBUG) console.log(`Start ${blockStart}, End ${blockEnd}, last length ${last_line_length}\nOrig: ${blockContent}`);
 
         let lines;
         if (add_ids) {
@@ -203,6 +206,17 @@ export default class ProjectTasks extends Plugin {
     getPrefixFromString(text: string) {
         // Remove any # signs
         text = text.replaceAll("#", '');
+        // Only use the first letters of words if needed
+        if (this.settings.firstLettersOfWords) {
+            let words = text.split(/\s+/);
+            if (DEBUG) console.log("found words", words);
+            text = "";
+            for (let word of words) {
+                if (word) {
+                    text = `${text}${word[0].toUpperCase()}`;
+                }
+            }
+        }
         // Remove spaces
         text = text.replaceAll(' ', '');
         // Remove vowels if needed
@@ -342,6 +356,16 @@ class SampleSettingTab extends PluginSettingTab {
                 .setValue(this.plugin.settings.removeVowels)
                 .onChange(async (value) => {
                     this.plugin.settings.removeVowels = value;
+                    await this.plugin.saveSettings();
+                }));
+
+        new Setting(containerEl)
+            .setName('First letter of words')
+            .setDesc('Only use the first letter of words to form the prefix')
+            .addToggle(text => text
+                .setValue(this.plugin.settings.firstLettersOfWords)
+                .onChange(async (value) => {
+                    this.plugin.settings.firstLettersOfWords = value;
                     await this.plugin.saveSettings();
                 }));
     }
