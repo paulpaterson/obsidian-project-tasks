@@ -298,7 +298,7 @@ is not blocked
                 if (this.settings.nestedTaskBehavior == NestingBehaviour.ParallelExecution) {
                     let nesting_depth = this.getNestingLevel(match[1]);
                     if (nesting_depth > current_nesting) {
-                        // Add a new level of nexting
+                        // Add a new level of nesting
                         current_nesting += 1;
                         is_parallel = true;
                         nesting_ids.push(``);
@@ -317,7 +317,7 @@ is not blocked
                 let this_line;
                 // Get an id to use
                 if (this.settings.idPrefixMethod == PrefixMethod.UsePrefix) {
-                    this_id = `${prefix}this.generateRandomDigits(this.settings.randomIDLength)`;
+                    this_id = `${prefix}${this.generateRandomDigits(this.settings.randomIDLength)}`;
                 } else {
                     this_id = `${prefix}${idx + this.settings.sequentialStartNumber}`;
                 }
