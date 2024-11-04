@@ -10,6 +10,7 @@ import {
     Setting,
     View
 } from 'obsidian';
+import * as net from "net";
 
 // Turn on to allow debugging in the console
 const DEBUG = true;
@@ -181,11 +182,11 @@ is not blocked
 
     clearBlockIDs(sel: string) {
         // Remove existing ID's
-        let remove_id = /\h?🆔\s\w+\h*/g;
+        let remove_id = /\h?🆔\s[\w,]+\h*/g;
         sel = sel.replaceAll(remove_id, '');
 
         // Remove existing Blocks
-        let remove_block = /\h?⛔\s\w+\h*/g;
+        let remove_block = /\h?⛔\s[\w,]+\h*/g;
         sel = sel.replaceAll(remove_block, '');
 
         // Remove existing tags
@@ -263,6 +264,12 @@ is not blocked
         return text;
     }
 
+    getNestingLevel(task_marker: string) {
+        // The nesting level is the number of spaces before the first "-" character
+        let parts = task_marker.replaceAll("\n", "").split("-");
+        return parts[0].length;
+    }
+
     addTaskIDs(sel: string, prefix: string) {
         const regex = /^(\s*-\s\[[ x\-\/]\]\s)?(.*)$/mg;
 
@@ -275,8 +282,10 @@ is not blocked
         let lines = "";
         let first = true;
         let idx = 0;
+        let nesting_ids = ["0:ERROR!"];
+        let current_nesting = 0;
+        let is_parallel = false;
         let this_id;
-        let last_id;
 
         // Go through all the lines and add appropriate ID and block tags
         for (const match of matches) {
@@ -285,18 +294,42 @@ is not blocked
             }
             // Is this a task line at all?
             if (match[1]) {
+                // Watch out for changes in nesting
+                if (this.settings.nestedTaskBehavior == NestingBehaviour.ParallelExecution) {
+                    let nesting_depth = this.getNestingLevel(match[1]);
+                    if (nesting_depth > current_nesting) {
+                        // Add a new level of nexting
+                        current_nesting += 1;
+                        is_parallel = true;
+                        nesting_ids.push(``);
+                    } else if (nesting_depth < current_nesting) {
+                        // Remove levels of nesting
+                        while (current_nesting > nesting_depth) {
+                            current_nesting -= 1;
+                            let nested = nesting_ids.pop();
+                            if (nested) {
+                                nesting_ids[nesting_ids.length - 1] += `,${nested}`;
+                            }
+                            is_parallel = current_nesting > 0;
+                        }
+                    }
+                }
                 let this_line;
                 // Get an id to use
                 if (this.settings.idPrefixMethod == PrefixMethod.UsePrefix) {
-                    this_id = this.generateRandomDigits(this.settings.randomIDLength);
+                    this_id = `${prefix}this.generateRandomDigits(this.settings.randomIDLength)`;
                 } else {
-                    this_id = `${idx + this.settings.sequentialStartNumber}`;
+                    this_id = `${prefix}${idx + this.settings.sequentialStartNumber}`;
                 }
                 // Add the id into there
-                this_line = `${match[1]}${match[2].trim()} 🆔 ${prefix}${this_id}`;
+                this_line = `${match[1]}${match[2].trim()} 🆔 ${this_id}`;
                 if (idx > 0) {
                     // Add the blocks after the very first task
-                    this_line += ` ⛔ ${prefix}${last_id}`;
+                    if (is_parallel) {
+                        this_line += ` ⛔ ${nesting_ids[current_nesting - 1]}`;
+                    } else {
+                        this_line += ` ⛔ ${nesting_ids.last()}`;
+                    }
                 }
 
                 // Add an automatic tag if we need it
@@ -307,7 +340,13 @@ is not blocked
                 // Append this line
                 lines += this_line;
                 idx += 1;
-                last_id = this_id;
+                if (is_parallel) {
+                    if (nesting_ids.last()) nesting_ids[nesting_ids.length - 1] += ",";
+                    nesting_ids[nesting_ids.length - 1] += `${this_id}`;
+                } else {
+                    nesting_ids[nesting_ids.length - 1] = this_id;
+                }
+                if (DEBUG) console.log(`Nesting level ${current_nesting}, ids ${nesting_ids}`);
             } else {
                 // Not a task line so just keep it as is
                 lines += `${match[2].trim()}`;
