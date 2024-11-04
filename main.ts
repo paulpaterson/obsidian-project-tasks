@@ -181,7 +181,7 @@ is not blocked
 
         // Remove existing tags
         if (this.settings.automaticTagName) {
-            let remove_tag = new RegExp("^(-\\s\\[[ x\\-\\/]\]\\s.*)(#" + this.settings.automaticTagName + ")(.*)$", "mg");
+            let remove_tag = new RegExp("^(\\s*-\\s\\[[ x\\-\\/]\]\\s.*)(#" + this.settings.automaticTagName + ")(.*)$", "mg");
             sel = sel.replaceAll(remove_tag, '$1 $3');
         }
 
@@ -255,7 +255,7 @@ is not blocked
     }
 
     addTaskIDs(sel: string, prefix: string) {
-        const regex = /^(-\s\[[ x\-\/]\]\s)?(.*)$/mg;
+        const regex = /^(\s*-\s\[[ x\-\/]\]\s)?(.*)$/mg;
 
         // Clear all the existing block and project ID's
         sel = this.clearBlockIDs(sel);
