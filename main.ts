@@ -24,6 +24,11 @@ enum PrefixMethod {
     FileName = '3'
 }
 
+enum NestingBehaviour {
+    ParallelExecution = '1',
+    SequentialExecution = '2',
+}
+
 interface ProjectTasksSettings {
     idPrefixMethod: PrefixMethod;
     projectPrefix: string;
@@ -32,6 +37,8 @@ interface ProjectTasksSettings {
     removeVowels: boolean;
     firstLettersOfWords: boolean;
     automaticTagName: string;
+    nestedTaskBehavior: NestingBehaviour;
+
 }
 
 const DEFAULT_SETTINGS: ProjectTasksSettings = {
@@ -42,7 +49,9 @@ const DEFAULT_SETTINGS: ProjectTasksSettings = {
     removeVowels: false,
     firstLettersOfWords: false,
     automaticTagName: "Project",
+    nestedTaskBehavior: NestingBehaviour.ParallelExecution,
 }
+
 
 export default class ProjectTasks extends Plugin {
     settings: ProjectTasksSettings;
@@ -413,5 +422,17 @@ class ProjectTasksSettingsTab extends PluginSettingTab {
                     this.plugin.settings.automaticTagName = value.replaceAll('#', '');
                     await this.plugin.saveSettings();
                 }));
+
+        new Setting(containerEl)
+            .setName('Nested tags behaviour')
+            .setDesc('Determines whether nested tags will create parallel execution tags or sequential')
+            .addDropdown(dropDown => {
+                dropDown.addOption('1', 'Parallel Execution');
+                dropDown.addOption('2', 'Sequential Execution')
+                .setValue(this.plugin.settings.nestedTaskBehavior)
+                .onChange(async (value) => {
+                    this.plugin.settings.nestedTaskBehavior = value as NestingBehaviour;
+                    await this.plugin.saveSettings();
+                })});
     }
 }
