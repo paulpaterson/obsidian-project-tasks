@@ -151,9 +151,6 @@ is not blocked
         editor.replaceRange(lines, { line: blockStart, ch: 0 }, { line: blockEnd, ch: last_line_length });
     }
 
-
-
-
     getPrefix(editor: Editor, view: MarkdownFileInfo) {
         let raw_prefix;
         switch (this.settings.idPrefixMethod) {
@@ -167,23 +164,7 @@ is not blocked
             }
             case PrefixMethod.SectionName: {
                 // Try to find the name of the block that contains the cursor or the selection
-                let section_start = Helper.getBlockStart(editor);
-                let section_line;
-                if (section_start == 0) {
-                    section_line = "";
-                } else {
-                    section_line = editor.getLine(section_start-1);
-                }
-                if (DEBUG) console.log('Prefix check .. Found section: ', section_start, section_line);
-
-                // Is there a block at all or are we just in a file with no blocks
-                if (BLOCK_BOUNDARY.test(section_line)) {
-                    raw_prefix = section_line;
-                } else {
-                    // Return the filename anyway
-                    raw_prefix = this.getFilename(view);
-                }
-                break;
+                raw_prefix = Helper.getSectionName(editor, this.getFilename(view));
             }
         }
         return Helper.getPrefixFromString(raw_prefix, this.settings.firstLettersOfWords, this.settings.removeVowels);

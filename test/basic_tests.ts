@@ -244,3 +244,39 @@ describe('testing the block end detection', () => {
   })
 
 })
+
+export let file: string[] = []
+describe('test getting the section name', () => {
+  beforeAll(() => {
+    file = ['first', '# One', 'two', 'three', '# Four', 'five', 'six'];
+  })
+
+  test('empty file should be filename', () => {
+    expect(H.getSectionName(getEditor([], 0), 'test.md')).toBe('test.md');
+  })
+
+  test('file with no block should be filename', () => {
+    expect(H.getSectionName(getEditor(['one', 'two', 'three'], 0), 'test.md')).toBe('test.md');
+  })
+
+  test('file with section but before it', () => {
+    expect(H.getSectionName(getEditor(file, 0), "test.md")).toBe("test.md");
+  })
+
+  test('file with section and on the section line', () => {
+    expect(H.getSectionName(getEditor(file, 1), "test.md")).toBe("# One");
+  })
+
+  test('file with section and in the section', () => {
+    expect(H.getSectionName(getEditor(file, 2), "test.md")).toBe("# One");
+  })
+
+  test('file with section and in the second section line', () => {
+    expect(H.getSectionName(getEditor(file, 4), "test.md")).toBe("# Four");
+  })
+
+  test('file with section and in the second section', () => {
+    expect(H.getSectionName(getEditor(file, 5), "test.md")).toBe("# Four");
+  })
+
+})
