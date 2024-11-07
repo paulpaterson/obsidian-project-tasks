@@ -4,7 +4,7 @@
   "randomIDLength": 3,
   "sequentialStartNumber": 0,
   "removeVowels": true,
-  "firstLettersOfWords": true,
+  "firstLettersOfWords": false,
   "automaticTagName": "Project",
   "nestedTaskBehavior": "1"
 }

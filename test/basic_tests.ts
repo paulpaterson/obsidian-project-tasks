@@ -41,3 +41,43 @@ describe('testing the random digit creation', () => {
 
 })
 
+
+describe('testing the generation of a prefix from a string', () => {
+  test('single word is just replicated', () => {
+    expect(H.getPrefixFromString("Test", false, false)).toBe("Test");
+  })
+
+  test('multiple words remove spaces', () => {
+    expect(H.getPrefixFromString("Test This", false, false)).toBe("TestThis");
+  })
+
+  test('multiple words lower case the letters', () => {
+    expect(H.getPrefixFromString("test this", false, false)).toBe("TestThis");
+  })
+
+  test('remove any tags from text', () => {
+    expect(H.getPrefixFromString("test #this", false, false)).toBe("TestThis");
+  })
+
+  test('multiple words first letters', () => {
+    expect(H.getPrefixFromString("test this please", true, false)).toBe("TTP");
+  })
+
+  test('multiple words first letters tags', () => {
+    expect(H.getPrefixFromString("test #this please", true, false)).toBe("TTP");
+  })
+
+  test('multiple words remove vowels', () => {
+    expect(H.getPrefixFromString("test this please", false, true)).toBe("TstThsPls");
+  })
+
+  test('multiple words, first letters keep lower case vowels', () => {
+    expect(H.getPrefixFromString("test only this please", true, true)).toBe("TOTP");
+  })
+
+  test('multiple words, first letters keep upper case vowels', () => {
+    expect(H.getPrefixFromString("Test Only This Please", true, true)).toBe("TOTP");
+  })
+
+
+})
