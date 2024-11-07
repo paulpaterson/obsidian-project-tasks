@@ -169,17 +169,7 @@ is not blocked
         return blockStart;
     }
 
-    generateRandomDigits(length: number): string {
-      const digits = '0123456789';
-      let randomString = '';
 
-      for (let i = 0; i < length; i++) {
-        const randomIndex = Math.floor(Math.random() * digits.length);
-        randomString += digits[randomIndex];
-      }
-
-      return randomString;
-    }
 
     clearBlockIDs(sel: string) {
         // Remove existing ID's
@@ -314,7 +304,7 @@ is not blocked
                 let this_line;
                 // Get an id to use
                 if (this.settings.idPrefixMethod == PrefixMethod.UsePrefix) {
-                    this_id = `${prefix}${this.generateRandomDigits(this.settings.randomIDLength)}`;
+                    this_id = `${prefix}${Helper.generateRandomDigits(this.settings.randomIDLength)}`;
                 } else {
                     this_id = `${prefix}${idx + this.settings.sequentialStartNumber}`;
                 }
