@@ -2,6 +2,37 @@ import Helper from "../helpers";
 
 let H = Helper;
 
+class MockEditor {
+  lines: string[];
+  cursor: MockCursor;
+  constructor(lines: string[], current_line: number) {
+    this.lines = lines;
+    this.cursor = new MockCursor(current_line);
+  }
+  getCursor() {
+    return this.cursor;
+  }
+  getLine(n: number) {
+    return this.lines[n];
+  }
+
+  lineCount() {
+    return this.lines.length;
+  }
+}
+
+class MockCursor {
+  line: number;
+  constructor(n: number) {
+    this.line = n;
+  }
+
+}
+
+function getEditor(lines: string[], current_line: number) {
+  return new MockEditor(lines, current_line);
+}
+
 describe('testing determining the nesting level', () => {
   test('zero nesting level', () => {
     expect(Helper.getNestingLevel("- [ ] ")).toBe(0);
@@ -41,7 +72,6 @@ describe('testing the random digit creation', () => {
 
 })
 
-
 describe('testing the generation of a prefix from a string', () => {
   test('single word is just replicated', () => {
     expect(H.getPrefixFromString("Test", false, false)).toBe("Test");
@@ -79,7 +109,6 @@ describe('testing the generation of a prefix from a string', () => {
     expect(H.getPrefixFromString("Test Only This Please", true, true)).toBe("TOTP");
   })
 })
-
 
 describe('testing of clearing of the block ID\'s from some text', () => {
   for (let char of ['🆔', '⛔']) {
@@ -145,6 +174,73 @@ describe('testing of clearing tags from tasks', () => {
     expect(H.clearBlockIDs('- [ ] Set available budget 🆔 BNC0 #Project', 'Project')).toBe(
         '- [ ] Set available budget '
     )
+  })
+
+})
+
+describe('testing the block boundary detection', () => {
+  test('empty file block start', () => {
+    expect(H.getBlockStart(getEditor([], 0))).toBe(0)
+  })
+
+  test('file with lines block start', () => {
+    expect(H.getBlockStart(getEditor(['one', 'two', 'three'], 2))).toBe(0);
+    expect(H.getBlockStart(getEditor(['one', 'two', 'three'], 1))).toBe(0);
+  })
+
+  test('block at the start of the file', () => {
+    expect(H.getBlockStart(getEditor(['# One', 'two', 'three'], 0))).toBe(1);
+    expect(H.getBlockStart(getEditor(['# One', 'two', 'three'], 1))).toBe(1);
+    expect(H.getBlockStart(getEditor(['# One', 'two', 'three'], 2))).toBe(1);
+  })
+
+  test('tag at the start of the file', () => {
+    expect(H.getBlockStart(getEditor(['#One', 'two', 'three'], 1))).toBe(0);
+    expect(H.getBlockStart(getEditor(['#One', 'two', 'three'], 2))).toBe(0);
+  })
+
+  test('multiple blocks get the right one', () => {
+    let file = ['first', '# One', 'two', 'three', '# Four', 'five', 'six']
+    expect(H.getBlockStart(getEditor(file, 0))).toBe(0);
+    expect(H.getBlockStart(getEditor(file, 1))).toBe(2);
+    expect(H.getBlockStart(getEditor(file, 2))).toBe(2);
+    expect(H.getBlockStart(getEditor(file, 3))).toBe(2);
+    expect(H.getBlockStart(getEditor(file, 4))).toBe(5);
+    expect(H.getBlockStart(getEditor(file, 5))).toBe(5);
+    expect(H.getBlockStart(getEditor(file, 6))).toBe(5);
+  })
+
+})
+
+describe('testing the block end detection', () => {
+  test('empty file block start', () => {
+    expect(H.getBlockEnd(getEditor([], 0))).toBe(1)
+  })
+
+  test('file with lines block start', () => {
+    expect(H.getBlockEnd(getEditor(['one', 'two', 'three'], 2))).toBe(3);
+    expect(H.getBlockEnd(getEditor(['one', 'two', 'three'], 1))).toBe(3);
+  })
+
+  test('block at the start of the file', () => {
+    expect(H.getBlockEnd(getEditor(['# One', 'two', 'three'], 1))).toBe(3);
+    expect(H.getBlockEnd(getEditor(['# One', 'two', 'three'], 2))).toBe(3);
+  })
+
+  test('tag at the start of the file', () => {
+    expect(H.getBlockEnd(getEditor(['#One', 'two', 'three'], 1))).toBe(3);
+    expect(H.getBlockEnd(getEditor(['#One', 'two', 'three'], 2))).toBe(3);
+  })
+
+  test('multiple blocks get the right one', () => {
+    let file = ['first', '# One', 'two', 'three', '# Four', 'five', 'six']
+    expect(H.getBlockEnd(getEditor(file, 0))).toBe(1);
+    expect(H.getBlockEnd(getEditor(file, 1))).toBe(4);
+    expect(H.getBlockEnd(getEditor(file, 2))).toBe(4);
+    expect(H.getBlockEnd(getEditor(file, 3))).toBe(4);
+    expect(H.getBlockEnd(getEditor(file, 4))).toBe(7);
+    expect(H.getBlockEnd(getEditor(file, 5))).toBe(7);
+    expect(H.getBlockEnd(getEditor(file, 6))).toBe(7);
   })
 
 })

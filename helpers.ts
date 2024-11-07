@@ -1,3 +1,18 @@
+import {Editor} from "obsidian";
+
+// Regex for block boundary
+const BLOCK_BOUNDARY = /^#+\s/;
+
+interface SimpleCursor {
+    line: number
+}
+
+interface SimpleEditor {
+    // This interface is created to help with the functions here that need the Obsidian Editor
+    getCursor(): SimpleCursor;
+    getLine(n: number): string;
+    lineCount(): number
+}
 
 export default class Helper {
     // Simple helper class that contains the business logic
@@ -63,5 +78,29 @@ export default class Helper {
         }
 
         return sel;
+    }
+
+    static getBlockEnd(editor: SimpleEditor) {
+        // Find the end of the block
+        let blockEnd = editor.getCursor().line;
+        if (blockEnd >= editor.lineCount() - 1) return blockEnd + 1;
+        blockEnd += 1;
+        while (!BLOCK_BOUNDARY.test(editor.getLine(blockEnd))) {
+            blockEnd++;
+            if (blockEnd > editor.lineCount() - 1) return blockEnd;
+        }
+        return blockEnd;
+    }
+
+    static getBlockStart(editor: SimpleEditor) {
+        // Find the start of the block
+        let blockStart = editor.getCursor().line;
+        if (BLOCK_BOUNDARY.test(editor.getLine(blockStart))) {
+            return Math.min(editor.lineCount() -1, blockStart + 1);
+        }
+        while (blockStart > 0 && !BLOCK_BOUNDARY.test(editor.getLine(blockStart - 1))) {
+            blockStart--;
+        }
+        return blockStart;
     }
 }

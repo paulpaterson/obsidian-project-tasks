@@ -15,9 +15,10 @@ import Helper from "./helpers";
 
 // Turn on to allow debugging in the console
 const DEBUG = true;
-// Regex for block boundary
-const BLOCK_BOUNDARY = /^#+\s/;
 
+// Regex for block boundary
+// ToDo - this is duplicated in the Helper class, should refactor this
+const BLOCK_BOUNDARY = /^#+\s/;
 
 
 enum PrefixMethod {
@@ -132,8 +133,8 @@ is not blocked
         const line = editor.getLine(cursor.line);
 
         // Get the block boundaries
-        let blockStart = this.getBlockStart(editor);
-        let blockEnd = this.getBlockEnd(editor);
+        let blockStart = Helper.getBlockStart(editor);
+        let blockEnd = Helper.getBlockEnd(editor);
         let last_line_length = editor.getLine(blockEnd + 1).length;
 
         const blockContent = editor.getRange({ line: blockStart, ch: 0 }, { line: blockEnd, ch: last_line_length });
@@ -150,24 +151,8 @@ is not blocked
         editor.replaceRange(lines, { line: blockStart, ch: 0 }, { line: blockEnd, ch: last_line_length });
     }
 
-    private getBlockEnd(editor: Editor) {
-        // Find the end of the block
-        let blockEnd = editor.getCursor().line;
-        while (!BLOCK_BOUNDARY.test(editor.getLine(blockEnd))) {
-            blockEnd++;
-            if (blockEnd > editor.lineCount() - 1) return blockEnd;
-        }
-        return blockEnd;
-    }
 
-    private getBlockStart(editor: Editor) {
-        // Find the start of the block
-        let blockStart = editor.getCursor().line;
-        while (blockStart > 0 && !BLOCK_BOUNDARY.test(editor.getLine(blockStart - 1))) {
-            blockStart--;
-        }
-        return blockStart;
-    }
+
 
     getPrefix(editor: Editor, view: MarkdownFileInfo) {
         let raw_prefix;
@@ -182,7 +167,7 @@ is not blocked
             }
             case PrefixMethod.SectionName: {
                 // Try to find the name of the block that contains the cursor or the selection
-                let section_start = this.getBlockStart(editor);
+                let section_start = Helper.getBlockStart(editor);
                 let section_line;
                 if (section_start == 0) {
                     section_line = "";
