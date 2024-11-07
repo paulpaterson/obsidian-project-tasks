@@ -80,7 +80,7 @@ export default class ProjectTasks extends Plugin {
             name: "Clear project ids on Selection",
             editorCallback: (editor, view) => {
                 let sel = editor.getSelection();
-                let lines = this.clearBlockIDs(sel);
+                let lines = Helper.clearBlockIDs(sel, this.settings.automaticTagName);
                 editor.replaceSelection(
                     `${lines}`
                 );
@@ -143,7 +143,7 @@ is not blocked
         if (add_ids) {
             lines = this.addTaskIDs(blockContent, prefix);
         } else {
-            lines = this.clearBlockIDs(blockContent);
+            lines = Helper.clearBlockIDs(blockContent, this.settings.automaticTagName);
         }
 
         if (DEBUG) console.log(`Start ${blockStart}, End ${blockEnd}, last length ${last_line_length}\nOrig: ${blockContent}\nNew: ${lines}`);
@@ -168,27 +168,6 @@ is not blocked
         }
         return blockStart;
     }
-
-
-
-    clearBlockIDs(sel: string) {
-        // Remove existing ID's
-        let remove_id = /\h?🆔\s[\w,]+\h*/g;
-        sel = sel.replaceAll(remove_id, '');
-
-        // Remove existing Blocks
-        let remove_block = /\h?⛔\s[\w,]+\h*/g;
-        sel = sel.replaceAll(remove_block, '');
-
-        // Remove existing tags
-        if (this.settings.automaticTagName) {
-            let remove_tag = new RegExp("^(\\s*-\\s\\[[ x\\-\\/]\]\\s.*)(#" + this.settings.automaticTagName + ")(.*)$", "mg");
-            sel = sel.replaceAll(remove_tag, '$1 $3');
-        }
-
-        return sel;
-    }
-
 
     getPrefix(editor: Editor, view: MarkdownFileInfo) {
         let raw_prefix;
@@ -233,14 +212,11 @@ is not blocked
         }
     }
 
-
-
-
     addTaskIDs(sel: string, prefix: string) {
         const regex = /^(\s*-\s\[[ x\-\/]\]\s)?(.*)$/mg;
 
         // Clear all the existing block and project ID's
-        sel = this.clearBlockIDs(sel);
+        sel = Helper.clearBlockIDs(sel, this.settings.automaticTagName);
 
         if (DEBUG) console.log(`Replaced ids and blocks to give: ${sel}`);
 

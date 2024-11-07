@@ -46,4 +46,22 @@ export default class Helper {
         text = text.replaceAll(' ', '');
         return text;
     }
+
+    static clearBlockIDs(sel: string, automatic_tag: string) {
+        // Remove existing ID's
+        let remove_id = /[ \t]?🆔\s[\w,]+[ \t]*/g;
+        sel = sel.replaceAll(remove_id, '');
+
+        // Remove existing Blocks
+        let remove_block = /[ \t]?⛔\s[\w,]+[ \t]*/g;
+        sel = sel.replaceAll(remove_block, '');
+
+        // Remove existing tags
+        if (automatic_tag) {
+            let remove_tag = new RegExp("^(\\s*-\\s\\[[ x\\-\\/]\]\\s.*)(#" + automatic_tag + ")(.*)$", "mg");
+            sel = sel.replaceAll(remove_tag, '$1 $3');
+        }
+
+        return sel;
+    }
 }

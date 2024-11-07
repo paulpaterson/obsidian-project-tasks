@@ -78,6 +78,73 @@ describe('testing the generation of a prefix from a string', () => {
   test('multiple words, first letters keep upper case vowels', () => {
     expect(H.getPrefixFromString("Test Only This Please", true, true)).toBe("TOTP");
   })
+})
 
+
+describe('testing of clearing of the block ID\'s from some text', () => {
+  for (let char of ['🆔', '⛔']) {
+    test(`clear ${char} block IDs end of line`, () => {
+      expect(H.clearBlockIDs(`This ${char} Hello`, 'tag')).toBe('This');
+    })
+
+    test(`clear ${char} block IDs beginning of line`, () => {
+      expect(H.clearBlockIDs(`${char} Hello there`, 'tag')).toBe('there');
+    })
+
+    test(`clear ${char} block IDs middle of line`, () => {
+      expect(H.clearBlockIDs(`I said ${char} Hello there`, 'tag')).toBe('I saidthere');
+    })
+
+    test(`clear ${char} block IDs with numbers`, () => {
+      expect(H.clearBlockIDs(`This ${char} Hello123 there`, 'tag')).toBe('Thisthere');
+    })
+  }
+
+  test('clear blocker and ID with numbers', () => {
+    expect(H.clearBlockIDs('This 🆔 Hello123 ⛔ Hello123 there', 'tag')).toBe('Thisthere');
+  })
+})
+
+describe('testing of clearing tags from tasks', () => {
+  test('leave tags on non task lines', () => {
+    expect(H.clearBlockIDs('Some #tag\nIn some lines\nwith the #tag there', 'tag')).toBe(
+        'Some #tag\nIn some lines\nwith the #tag there'
+    )
+  })
+
+  test('remove tags on task lines', () => {
+    expect(H.clearBlockIDs('- [ ] Some #tag\n- [ ] In some lines\n- [ ] with the #tag there', 'tag')).toBe(
+        '- [ ] Some  \n- [ ] In some lines\n- [ ] with the   there'
+    )
+  })
+
+  test('remove tags on task lines and leave on non task', () => {
+    expect(H.clearBlockIDs('- [ ] Some #tag\nIn some lines #tag\n- [ ] with the #tag there', 'tag')).toBe(
+        '- [ ] Some  \nIn some lines #tag\n- [ ] with the   there'
+    )
+  })
+
+  test('leave other tags alone', () => {
+    expect(H.clearBlockIDs('- [ ] Some #tag\nIn some lines #tag\n- [ ] with the #tag there', 'othertag')).toBe(
+        '- [ ] Some #tag\nIn some lines #tag\n- [ ] with the #tag there'
+    )
+  })
+
+  test('remove tags on nested task lines and leave on non task', () => {
+    let block = '\n' +
+        '- [ ] Some #tag\n' +
+        'In some lines #tag\n' +
+        '- [ ] with the #tag there\n' +
+        '\t- [ ] And #tag nested\n'
+    expect(H.clearBlockIDs(block, 'tag')).toBe(
+        '\n- [ ] Some  \nIn some lines #tag\n- [ ] with the   there\n\t- [ ] And   nested\n'
+    )
+  })
+
+  test('single line', () => {
+    expect(H.clearBlockIDs('- [ ] Set available budget 🆔 BNC0 #Project', 'Project')).toBe(
+        '- [ ] Set available budget '
+    )
+  })
 
 })
