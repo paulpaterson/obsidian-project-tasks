@@ -106,21 +106,10 @@ export default class Helper {
 
     static getSectionName(editor: SimpleEditor, file_name: string) {
         let section_start = Helper.getBlockStart(editor);
-        let section_line;
         if (section_start == 0) {
-            section_line = "";
+            return file_name
         } else {
-            section_line = editor.getLine(section_start-1);
+            return editor.getLine(section_start-1);
         }
-
-        // Is there a block at all or are we just in a file with no blocks
-        let raw_prefix;
-        if (BLOCK_BOUNDARY.test(section_line)) {
-            raw_prefix = section_line;
-        } else {
-            // Return the filename anyway
-            raw_prefix = file_name;
-        }
-        return raw_prefix;
     }
 }
