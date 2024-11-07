@@ -22,7 +22,7 @@ const BLOCK_BOUNDARY = /^#+\s/;
 
 
 enum PrefixMethod {
-    UsePrefix= '1',
+    UsePrefix = '1',
     SectionName = '2',
     FileName = '3'
 }
@@ -69,7 +69,13 @@ export default class ProjectTasks extends Plugin {
             name: "Set project ids on Selection",
             editorCallback: (editor, view) => {
                 let sel = editor.getSelection();
-                let lines = this.addTaskIDs(sel, this.getPrefix(editor, view));
+                let lines = Helper.addTaskIDs(sel, this.getPrefix(editor, view),
+                    this.settings.automaticTagName,
+                    this.settings.nestedTaskBehavior == NestingBehaviour.ParallelExecution,
+                    this.settings.idPrefixMethod == PrefixMethod.UsePrefix,
+                    this.settings.randomIDLength,
+                    this.settings.sequentialStartNumber
+                );
                 editor.replaceSelection(
                     `${lines}`
                 );
@@ -137,18 +143,24 @@ is not blocked
         let blockEnd = Helper.getBlockEnd(editor);
         let last_line_length = editor.getLine(blockEnd + 1).length;
 
-        const blockContent = editor.getRange({ line: blockStart, ch: 0 }, { line: blockEnd, ch: last_line_length });
+        const blockContent = editor.getRange({line: blockStart, ch: 0}, {line: blockEnd, ch: last_line_length});
         if (DEBUG) console.log(`Start ${blockStart}, End ${blockEnd}, last length ${last_line_length}\nOrig: ${blockContent}`);
 
         let lines;
         if (add_ids) {
-            lines = this.addTaskIDs(blockContent, prefix);
+            lines = Helper.addTaskIDs(blockContent, prefix,
+                    this.settings.automaticTagName,
+                    this.settings.nestedTaskBehavior == NestingBehaviour.ParallelExecution,
+                    this.settings.idPrefixMethod == PrefixMethod.UsePrefix,
+                    this.settings.randomIDLength,
+                    this.settings.sequentialStartNumber
+                )
         } else {
             lines = Helper.clearBlockIDs(blockContent, this.settings.automaticTagName);
         }
 
         if (DEBUG) console.log(`Start ${blockStart}, End ${blockEnd}, last length ${last_line_length}\nOrig: ${blockContent}\nNew: ${lines}`);
-        editor.replaceRange(lines, { line: blockStart, ch: 0 }, { line: blockEnd, ch: last_line_length });
+        editor.replaceRange(lines, {line: blockStart, ch: 0}, {line: blockEnd, ch: last_line_length});
     }
 
     getPrefix(editor: Editor, view: MarkdownFileInfo) {
@@ -171,97 +183,11 @@ is not blocked
     }
 
     getFilename(view: MarkdownFileInfo) {
-       if (!view.file?.name) {
+        if (!view.file?.name) {
             return this.settings.projectPrefix;
         } else {
             return view.file.name.split('.')[0];
         }
-    }
-
-    addTaskIDs(sel: string, prefix: string) {
-        const regex = /^(\s*-\s\[[ x\-\/]\]\s)?(.*)$/mg;
-
-        // Clear all the existing block and project ID's
-        sel = Helper.clearBlockIDs(sel, this.settings.automaticTagName);
-
-        if (DEBUG) console.log(`Replaced ids and blocks to give: ${sel}`);
-
-        const matches = sel.matchAll(regex);
-        let lines = "";
-        let first = true;
-        let idx = 0;
-        let nesting_ids = ["0:ERROR!"];
-        let current_nesting = 0;
-        let is_parallel = false;
-        let this_id;
-
-        // Go through all the lines and add appropriate ID and block tags
-        for (const match of matches) {
-            if (!first) {
-                lines += "\n";
-            }
-            // Is this a task line at all?
-            if (match[1]) {
-                // Watch out for changes in nesting
-                if (this.settings.nestedTaskBehavior == NestingBehaviour.ParallelExecution) {
-                    let nesting_depth = Helper.getNestingLevel(match[1]);
-                    if (nesting_depth > current_nesting) {
-                        // Add a new level of nesting
-                        current_nesting += 1;
-                        is_parallel = true;
-                        nesting_ids.push(``);
-                    } else if (nesting_depth < current_nesting) {
-                        // Remove levels of nesting
-                        while (current_nesting > nesting_depth) {
-                            current_nesting -= 1;
-                            let nested = nesting_ids.pop();
-                            if (nested) {
-                                nesting_ids[nesting_ids.length - 1] += `,${nested}`;
-                            }
-                            is_parallel = current_nesting > 0;
-                        }
-                    }
-                }
-                let this_line;
-                // Get an id to use
-                if (this.settings.idPrefixMethod == PrefixMethod.UsePrefix) {
-                    this_id = `${prefix}${Helper.generateRandomDigits(this.settings.randomIDLength)}`;
-                } else {
-                    this_id = `${prefix}${idx + this.settings.sequentialStartNumber}`;
-                }
-                // Add the id into there
-                this_line = `${match[1]}${match[2].trim()} 🆔 ${this_id}`;
-                if (idx > 0) {
-                    // Add the blocks after the very first task
-                    if (is_parallel) {
-                        this_line += ` ⛔ ${nesting_ids[current_nesting - 1]}`;
-                    } else {
-                        this_line += ` ⛔ ${nesting_ids.last()}`;
-                    }
-                }
-
-                // Add an automatic tag if we need it
-                if (this.settings.automaticTagName) {
-                    this_line += ` #${this.settings.automaticTagName}`;
-                }
-
-                // Append this line
-                lines += this_line;
-                idx += 1;
-                if (is_parallel) {
-                    if (nesting_ids.last()) nesting_ids[nesting_ids.length - 1] += ",";
-                    nesting_ids[nesting_ids.length - 1] += `${this_id}`;
-                } else {
-                    nesting_ids[nesting_ids.length - 1] = this_id;
-                }
-                if (DEBUG) console.log(`Nesting level ${current_nesting}, ids ${nesting_ids}`);
-            } else {
-                // Not a task line so just keep it as is
-                lines += `${match[2].trim()}`;
-            }
-            first = false;
-        }
-        return lines;
     }
 
     onunload() {
@@ -298,11 +224,12 @@ class ProjectTasksSettingsTab extends PluginSettingTab {
                 dropDown.addOption('1', 'Use prefix');
                 dropDown.addOption('2', 'Use Section name');
                 dropDown.addOption('3', 'Use filename')
-                .setValue(this.plugin.settings.idPrefixMethod)
-                .onChange(async (value) => {
-                    this.plugin.settings.idPrefixMethod = value as PrefixMethod;
-                    await this.plugin.saveSettings();
-                })});
+                    .setValue(this.plugin.settings.idPrefixMethod)
+                    .onChange(async (value) => {
+                        this.plugin.settings.idPrefixMethod = value as PrefixMethod;
+                        await this.plugin.saveSettings();
+                    })
+            });
 
         new Setting(containerEl)
             .setName('Project ID prefix')
@@ -376,11 +303,12 @@ class ProjectTasksSettingsTab extends PluginSettingTab {
             .addDropdown(dropDown => {
                 dropDown.addOption('1', 'Parallel Execution');
                 dropDown.addOption('2', 'Sequential Execution')
-                .setValue(this.plugin.settings.nestedTaskBehavior)
-                .onChange(async (value) => {
-                    this.plugin.settings.nestedTaskBehavior = value as NestingBehaviour;
-                    await this.plugin.saveSettings();
-                })});
+                    .setValue(this.plugin.settings.nestedTaskBehavior)
+                    .onChange(async (value) => {
+                        this.plugin.settings.nestedTaskBehavior = value as NestingBehaviour;
+                        await this.plugin.saveSettings();
+                    })
+            });
     }
 }
 
