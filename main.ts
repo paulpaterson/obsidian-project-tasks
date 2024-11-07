@@ -11,6 +11,7 @@ import {
     View
 } from 'obsidian';
 import * as net from "net";
+import Helper from "./helpers";
 
 // Turn on to allow debugging in the console
 const DEBUG = true;
@@ -198,11 +199,6 @@ is not blocked
         return sel;
     }
 
-    getNestingLevel(task_marker: string): number {
-        // The nesting level is the number of spaces before the first "-" character
-        let parts = task_marker.replaceAll("\n", "").split("-");
-        return parts[0].length;
-    }
 
     getPrefix(editor: Editor, view: MarkdownFileInfo) {
         let raw_prefix;
@@ -297,7 +293,7 @@ is not blocked
             if (match[1]) {
                 // Watch out for changes in nesting
                 if (this.settings.nestedTaskBehavior == NestingBehaviour.ParallelExecution) {
-                    let nesting_depth = this.getNestingLevel(match[1]);
+                    let nesting_depth = Helper.getNestingLevel(match[1]);
                     if (nesting_depth > current_nesting) {
                         // Add a new level of nesting
                         current_nesting += 1;
