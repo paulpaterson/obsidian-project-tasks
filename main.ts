@@ -198,6 +198,12 @@ is not blocked
         return sel;
     }
 
+    getNestingLevel(task_marker: string): number {
+        // The nesting level is the number of spaces before the first "-" character
+        let parts = task_marker.replaceAll("\n", "").split("-");
+        return parts[0].length;
+    }
+
     getPrefix(editor: Editor, view: MarkdownFileInfo) {
         let raw_prefix;
         switch (this.settings.idPrefixMethod) {
@@ -264,11 +270,6 @@ is not blocked
         return text;
     }
 
-    getNestingLevel(task_marker: string) {
-        // The nesting level is the number of spaces before the first "-" character
-        let parts = task_marker.replaceAll("\n", "").split("-");
-        return parts[0].length;
-    }
 
     addTaskIDs(sel: string, prefix: string) {
         const regex = /^(\s*-\s\[[ x\-\/]\]\s)?(.*)$/mg;
@@ -475,3 +476,4 @@ class ProjectTasksSettingsTab extends PluginSettingTab {
                 })});
     }
 }
+
