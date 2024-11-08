@@ -410,3 +410,31 @@ describe('testing the adding of block ids to some tasks', () => {
   })
 })
 
+describe('testing getting all the blocks in a file', () =>  {
+  test('empty file is empty', () => {
+    expect(H.getAllBlockStarts(getEditor([''],0)))
+        .toStrictEqual([0])
+  })
+
+  test('file with no sections', () => {
+    expect(H.getAllBlockStarts(getEditor(['one', 'two', 'three'],0)))
+        .toStrictEqual([0])
+  })
+
+  test('file with one section that starts from beginning', () => {
+    expect(H.getAllBlockStarts(getEditor(['# one', 'two', 'three'],0)))
+        .toStrictEqual([0])
+  })
+
+  test('file with one section that starts after the beginning', () => {
+    expect(H.getAllBlockStarts(getEditor(['one', '# two', 'three'],0)))
+        .toStrictEqual([0, 1])
+  })
+
+  test('file with multiple sections that starts after the beginning', () => {
+    expect(H.getAllBlockStarts(getEditor(['one', '# two', 'three', '# four', 'five', '# six', '# seven'],0)))
+        .toStrictEqual([0, 1, 3, 5, 6])
+  })
+
+
+})

@@ -105,6 +105,22 @@ export default class Helper {
         return blockStart;
     }
 
+    static getAllBlockStarts(editor: SimpleEditor) {
+        // Return all the lines that mark the start of a block in a file
+        let blocks = [0];
+        let section = /^#?\s\w+/
+        for (let line_number = 0; line_number < editor.lineCount(); line_number++) {
+            if (section.test(editor.getLine(line_number))) {
+                // Special case when the first line is a section we don't have to add it
+                if (line_number > 0) {
+                    blocks.push(line_number);
+                }
+            }
+        }
+
+        return blocks;
+    }
+
     static getSectionName(editor: SimpleEditor, file_name: string) {
         let section_start = Helper.getBlockStart(editor);
         if (section_start == 0) {
