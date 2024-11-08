@@ -336,7 +336,28 @@ describe('testing the adding of block ids to some tasks', () => {
             '\n'
         )
   })
-  test('nested tasks sequential', () => {
+
+  test('nested tasks with extra nesting in parallel', () => {
+    expect(H.addTaskIDs('- [ ] one \n' +
+        '\t- [ ] two \n' +
+        '\t- [ ] three \n' +
+        '\t\t- [ ] four \n' +
+        '\t\t- [ ] five \n' +
+        '\t- [ ] six \n' +
+        '- [ ] seven \n' +
+        '- [ ] eight ', 'F', 'tag', true, false, 3, 0))
+        .toBe('- [ ] one 🆔 F0 #tag\n' +
+            '\t- [ ] two 🆔 F1 ⛔ F0 #tag\n' +
+            '\t- [ ] three 🆔 F2 ⛔ F0 #tag\n' +
+            '\t\t- [ ] four 🆔 F3 ⛔ F1,F2 #tag\n' +
+            '\t\t- [ ] five 🆔 F4 ⛔ F1,F2 #tag\n' +
+            '\t- [ ] six 🆔 F5 ⛔ F0 #tag\n' +
+            '- [ ] seven 🆔 F6 ⛔ F0,F1,F2,F3,F4,F5 #tag\n' +
+            '- [ ] eight 🆔 F7 ⛔ F6 #tag'
+        )
+  })
+
+  test('nested tasks with sequential', () => {
     expect(H.addTaskIDs('- [ ] one\n' +
         '\t- [ ] two\n' +
         '\t- [ ] three\n' +
@@ -346,6 +367,26 @@ describe('testing the adding of block ids to some tasks', () => {
             '\t- [ ] three 🆔 F2 ⛔ F1 #tag\n' +
             '- [ ] four 🆔 F3 ⛔ F2 #tag' +
             '\n'
+        )
+  })
+
+  test('nested tasks extra nesting sequential', () => {
+    expect(H.addTaskIDs('- [ ] one \n' +
+        '\t- [ ] two \n' +
+        '\t- [ ] three \n' +
+        '\t\t- [ ] four \n' +
+        '\t\t- [ ] five \n' +
+        '\t- [ ] six \n' +
+        '- [ ] seven \n' +
+        '- [ ] eight ', 'F', 'tag', false, false, 3, 0))
+        .toBe('- [ ] one 🆔 F0 #tag\n' +
+            '\t- [ ] two 🆔 F1 ⛔ F0 #tag\n' +
+            '\t- [ ] three 🆔 F2 ⛔ F1 #tag\n' +
+            '\t\t- [ ] four 🆔 F3 ⛔ F2 #tag\n' +
+            '\t\t- [ ] five 🆔 F4 ⛔ F3 #tag\n' +
+            '\t- [ ] six 🆔 F5 ⛔ F4 #tag\n' +
+            '- [ ] seven 🆔 F6 ⛔ F5 #tag\n' +
+            '- [ ] eight 🆔 F7 ⛔ F6 #tag'
         )
   })
 })

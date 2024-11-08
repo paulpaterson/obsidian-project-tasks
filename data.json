@@ -6,5 +6,5 @@
   "removeVowels": true,
   "firstLettersOfWords": true,
   "automaticTagName": "tag",
-  "nestedTaskBehavior": "1"
+  "nestedTaskBehavior": "2"
 }
