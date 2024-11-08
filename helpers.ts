@@ -173,7 +173,7 @@ export default class Helper {
                     if (is_parallel) {
                         this_line += ` ⛔ ${nesting_ids[current_nesting - 1]}`;
                     } else {
-                        this_line += ` ⛔ ${nesting_ids.last()}`;
+                        this_line += ` ⛔ ${nesting_ids[nesting_ids.length - 1]}`;
                     }
                 }
 
@@ -186,7 +186,7 @@ export default class Helper {
                 lines += this_line;
                 idx += 1;
                 if (is_parallel) {
-                    if (nesting_ids.last()) nesting_ids[nesting_ids.length - 1] += ",";
+                    if (nesting_ids[nesting_ids.length - 1]) nesting_ids[nesting_ids.length - 1] += ",";
                     nesting_ids[nesting_ids.length - 1] += `${this_id}`;
                 } else {
                     nesting_ids[nesting_ids.length - 1] = this_id;

@@ -1,6 +1,7 @@
 import Helper from "../helpers";
 
 let H = Helper;
+export let file: string[] = []
 
 class MockEditor {
   lines: string[];
@@ -245,7 +246,7 @@ describe('testing the block end detection', () => {
 
 })
 
-export let file: string[] = []
+
 describe('test getting the section name', () => {
   beforeAll(() => {
     file = ['first', '# One', 'two', 'three', '# Four', 'five', 'six'];
@@ -279,4 +280,72 @@ describe('test getting the section name', () => {
     expect(H.getSectionName(getEditor(file, 5), "test.md")).toBe("# Four");
   })
 
+})
+
+describe('testing the adding of block ids to some tasks', () => {
+  test('empty file should be unchanged', () => {
+    expect(H.addTaskIDs('', 'Proj', 'Tag', true, false, 3, 0))
+        .toBe('')
+  })
+
+  test('file with no tasks should be unchanged', () => {
+    expect(H.addTaskIDs('this is a file\nwith no tasks\nso there', 'Proj', 'Tag', true, false, 3, 0))
+        .toBe('this is a file\nwith no tasks\nso there')
+  })
+
+  test('file tasks should add ids not using prefix and no tag', () => {
+    expect(H.addTaskIDs('\n' +
+        '\n' +
+        '- [ ] one\n' +
+        '- [ ] two\n' +
+        '\n' +
+        '- [ ] three\n', 'Proj', '', true, false, 3, 0))
+        .toBe('\n\n- [ ] one 🆔 Proj0\n- [ ] two 🆔 Proj1 ⛔ Proj0\n\n- [ ] three 🆔 Proj2 ⛔ Proj1\n')
+  })
+
+  test('file tasks should add ids not using prefix and adding tags', () => {
+    expect(H.addTaskIDs('\n' +
+        '\n' +
+        '- [ ] one\n' +
+        '- [ ] two\n' +
+        '\n' +
+        '- [ ] three\n', 'Proj', 'Tag', true, false, 3, 0))
+        .toBe('\n\n- [ ] one 🆔 Proj0 #Tag\n- [ ] two 🆔 Proj1 ⛔ Proj0 #Tag\n\n- [ ] three 🆔 Proj2 ⛔ Proj1 #Tag\n')
+  })
+
+  test('line with task and sequential start set', () => {
+    expect(H.addTaskIDs('- [ ] one', 'Proj', '', true, false, 3, 10))
+        .toBe('- [ ] one 🆔 Proj10')
+  })
+
+  test('two lines with task and prefix', () => {
+    let result = H.addTaskIDs('- [ ] one\n- [ ] two', 'Proj', '', true, true, 3, 10);
+    let match = /- \[ ] one 🆔 Proj(\d\d\d)\n- \[ ] two 🆔 Proj\d\d\d ⛔ Proj\1/m
+    expect(match.test(result)).toBeTruthy()
+  })
+
+  test('nested tasks in parallel', () => {
+    expect(H.addTaskIDs('- [ ] one\n' +
+        '\t- [ ] two\n' +
+        '\t- [ ] three\n' +
+        '- [ ] four\n', 'F', 'tag', true, false, 3, 0))
+        .toBe('- [ ] one 🆔 F0 #tag\n' +
+            '\t- [ ] two 🆔 F1 ⛔ F0 #tag\n' +
+            '\t- [ ] three 🆔 F2 ⛔ F0 #tag\n' +
+            '- [ ] four 🆔 F3 ⛔ F0,F1,F2 #tag' +
+            '\n'
+        )
+  })
+  test('nested tasks sequential', () => {
+    expect(H.addTaskIDs('- [ ] one\n' +
+        '\t- [ ] two\n' +
+        '\t- [ ] three\n' +
+        '- [ ] four\n', 'F', 'tag', false, false, 3, 0))
+        .toBe('- [ ] one 🆔 F0 #tag\n' +
+            '\t- [ ] two 🆔 F1 ⛔ F0 #tag\n' +
+            '\t- [ ] three 🆔 F2 ⛔ F1 #tag\n' +
+            '- [ ] four 🆔 F3 ⛔ F2 #tag' +
+            '\n'
+        )
+  })
 })
