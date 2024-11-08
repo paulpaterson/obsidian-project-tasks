@@ -65,11 +65,11 @@ export default class Helper {
 
     static clearBlockIDs(sel: string, automatic_tag: string) {
         // Remove existing ID's
-        let remove_id = /[ \t]?🆔\s[\w,]+[ \t]*/g;
+        let remove_id = /🆔\s[\w,]+[ \t]*/g;
         sel = sel.replaceAll(remove_id, '');
 
         // Remove existing Blocks
-        let remove_block = /[ \t]?⛔\s[\w,]+[ \t]*/g;
+        let remove_block = /⛔\s[\w,]+[ \t]*/g;
         sel = sel.replaceAll(remove_block, '');
 
         // Remove existing tags
@@ -167,7 +167,10 @@ export default class Helper {
                     this_id = `${prefix}${idx + sequential_start}`;
                 }
                 // Add the id into there
-                this_line = `${match[1]}${match[2].trim()} 🆔 ${this_id}`;
+                let cleaned_line = match[2].trim();
+                // Add a space at the end if needed
+                if (cleaned_line != "") cleaned_line += " ";
+                this_line = `${match[1]}${cleaned_line}🆔 ${this_id}`;
                 if (idx > 0) {
                     // Add the blocks after the very first task
                     if (is_parallel) {

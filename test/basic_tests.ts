@@ -114,7 +114,7 @@ describe('testing the generation of a prefix from a string', () => {
 describe('testing of clearing of the block ID\'s from some text', () => {
   for (let char of ['🆔', '⛔']) {
     test(`clear ${char} block IDs end of line`, () => {
-      expect(H.clearBlockIDs(`This ${char} Hello`, 'tag')).toBe('This');
+      expect(H.clearBlockIDs(`This ${char} Hello`, 'tag')).toBe('This ');
     })
 
     test(`clear ${char} block IDs beginning of line`, () => {
@@ -122,16 +122,31 @@ describe('testing of clearing of the block ID\'s from some text', () => {
     })
 
     test(`clear ${char} block IDs middle of line`, () => {
-      expect(H.clearBlockIDs(`I said ${char} Hello there`, 'tag')).toBe('I saidthere');
+      expect(H.clearBlockIDs(`I said ${char} Hello there`, 'tag')).toBe('I said there');
     })
 
     test(`clear ${char} block IDs with numbers`, () => {
-      expect(H.clearBlockIDs(`This ${char} Hello123 there`, 'tag')).toBe('Thisthere');
+      expect(H.clearBlockIDs(`This ${char} Hello123 there`, 'tag')).toBe('This there');
     })
   }
 
   test('clear blocker and ID with numbers', () => {
-    expect(H.clearBlockIDs('This 🆔 Hello123 ⛔ Hello123 there', 'tag')).toBe('Thisthere');
+    expect(H.clearBlockIDs('This 🆔 Hello123 ⛔ Hello123 there', 'tag')).toBe('This there');
+  })
+
+
+  test('clear blocker and ID with numbers and tag', () => {
+    expect(H.clearBlockIDs('- [ ] This 🆔 Hello123 ⛔ Hello123 there #tag', 'tag')).toBe('- [ ] This there  ');
+  })
+
+  test('clear blocker with multiple sections', () => {
+    expect(H.clearBlockIDs('one\n# Header\n- [ ] one 🆔 Hello123 ⛔ Hello123 there #Tag\n\n# Other\n- [ ] two 🆔 Hello123 ⛔ Hello123 there #Tag\n', 'Tag'))
+        .toBe('one\n# Header\n- [ ] one there  \n\n# Other\n- [ ] two there  \n')
+  })
+
+  test('empty task can be cleared', () => {
+    expect(H.clearBlockIDs('- [ ] 🆔 O7 ⛔ O6 #tag', 'tag'))
+        .toBe('- [ ]  ')
   })
 })
 
@@ -173,7 +188,7 @@ describe('testing of clearing tags from tasks', () => {
 
   test('single line', () => {
     expect(H.clearBlockIDs('- [ ] Set available budget 🆔 BNC0 #Project', 'Project')).toBe(
-        '- [ ] Set available budget '
+        '- [ ] Set available budget  '
     )
   })
 
@@ -246,7 +261,6 @@ describe('testing the block end detection', () => {
 
 })
 
-
 describe('test getting the section name', () => {
   beforeAll(() => {
     file = ['first', '# One', 'two', 'three', '# Four', 'five', 'six'];
@@ -291,6 +305,11 @@ describe('testing the adding of block ids to some tasks', () => {
   test('file with no tasks should be unchanged', () => {
     expect(H.addTaskIDs('this is a file\nwith no tasks\nso there', 'Proj', 'Tag', true, false, 3, 0))
         .toBe('this is a file\nwith no tasks\nso there')
+  })
+
+  test('adding block ids to a line with them on already', () => {
+    expect(H.addTaskIDs('- [ ] 🆔 O7 ⛔ O6 #tag', 'O', 'tag', true, false, 3, 0))
+        .toBe('- [ ] 🆔 O0 #tag')
   })
 
   test('file tasks should add ids not using prefix and no tag', () => {
@@ -390,3 +409,4 @@ describe('testing the adding of block ids to some tasks', () => {
         )
   })
 })
+
