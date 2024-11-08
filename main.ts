@@ -118,6 +118,24 @@ export default class ProjectTasks extends Plugin {
             }
         })
 
+
+        this.addCommand({
+            id: "clear-ids-file",
+            name: "Clear project ids in entire file",
+            editorCallback: (editor, view) => {
+                let last_line = editor.lineCount()
+                let range_from = {line: 0, ch: 0}
+                let range_to = {line: last_line, ch: editor.getLine(last_line).length}
+                let sel = editor.getRange(range_from, range_to);
+                let lines = Helper.clearBlockIDs(sel, this.settings.automaticTagName);
+                editor.replaceRange(
+                    `${lines}`,
+                    range_from,
+                    range_to
+                );
+            }
+        })
+
         // This adds a settings tab so the user can configure various aspects of the plugin
         this.addSettingTab(new ProjectTasksSettingsTab(this.app, this));
 
