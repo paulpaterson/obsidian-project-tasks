@@ -213,7 +213,7 @@ export default class Helper {
                 if (DEBUG) console.log(`Nesting level ${current_nesting}, ids ${nesting_ids}`);
             } else {
                 // Not a task line so just keep it as is
-                lines += `${match[2].trim()}`;
+                lines += `${match[2]}`;
             }
             first = false;
         }

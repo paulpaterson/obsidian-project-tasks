@@ -408,6 +408,13 @@ describe('testing the adding of block ids to some tasks', () => {
             '- [ ] eight 🆔 F7 ⛔ F6 #tag'
         )
   })
+
+  test('adding block ids should preserve existing indentation', () => {
+    expect(H.addTaskIDs('- [ ] one \n\ttwo\n\t\tthree\n- [ ] four',
+        'F', '', false, false, 3, 0)).toBe(
+           '- [ ] one 🆔 F0\n\ttwo\n\t\tthree\n- [ ] four 🆔 F1 ⛔ F0'
+    )
+  })
 })
 
 describe('testing getting all the blocks in a file', () =>  {
@@ -435,6 +442,5 @@ describe('testing getting all the blocks in a file', () =>  {
     expect(H.getAllBlockStarts(getEditor(['one', '# two', 'three', '# four', 'five', '# six', '# seven'],0)))
         .toStrictEqual([0, 1, 3, 5, 6])
   })
-
 
 })

@@ -5,6 +5,6 @@
   "sequentialStartNumber": 0,
   "removeVowels": true,
   "firstLettersOfWords": true,
-  "automaticTagName": "tag",
-  "nestedTaskBehavior": "2"
+  "automaticTagName": "Act/Project",
+  "nestedTaskBehavior": "1"
 }

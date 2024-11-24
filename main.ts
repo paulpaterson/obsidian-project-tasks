@@ -118,7 +118,6 @@ export default class ProjectTasks extends Plugin {
             }
         })
 
-
         this.addCommand({
             id: "clear-ids-file",
             name: "Clear project ids in entire file",
