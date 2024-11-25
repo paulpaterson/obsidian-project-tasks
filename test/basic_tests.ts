@@ -115,64 +115,64 @@ describe('testing the generation of a prefix from a string', () => {
 describe('testing of clearing of the block ID\'s from some text', () => {
   for (let char of ['🆔', '⛔']) {
     test(`clear ${char} block IDs end of line`, () => {
-      expect(H.clearBlockIDs(`This ${char} Hello`, 'tag', false)).toBe('This ');
+      expect(H.clearBlockIDs(`This ${char} Hello`, ['tag'], false)).toBe('This ');
     })
 
     test(`clear ${char} block IDs beginning of line`, () => {
-      expect(H.clearBlockIDs(`${char} Hello there`, 'tag', false)).toBe('there');
+      expect(H.clearBlockIDs(`${char} Hello there`, ['tag'], false)).toBe('there');
     })
 
     test(`clear ${char} block IDs middle of line`, () => {
-      expect(H.clearBlockIDs(`I said ${char} Hello there`, 'tag', false)).toBe('I said there');
+      expect(H.clearBlockIDs(`I said ${char} Hello there`, ['tag'], false)).toBe('I said there');
     })
 
     test(`clear ${char} block IDs with numbers`, () => {
-      expect(H.clearBlockIDs(`This ${char} Hello123 there`, 'tag', false)).toBe('This there');
+      expect(H.clearBlockIDs(`This ${char} Hello123 there`, ['tag'], false)).toBe('This there');
     })
   }
 
   test('clear blocker and ID with numbers', () => {
-    expect(H.clearBlockIDs('This 🆔 Hello123 ⛔ Hello123 there', 'tag', false)).toBe('This there');
+    expect(H.clearBlockIDs('This 🆔 Hello123 ⛔ Hello123 there', ['tag'], false)).toBe('This there');
   })
 
 
   test('clear blocker and ID with numbers and tag', () => {
-    expect(H.clearBlockIDs('- [ ] This 🆔 Hello123 ⛔ Hello123 there #tag', 'tag', false))
+    expect(H.clearBlockIDs('- [ ] This 🆔 Hello123 ⛔ Hello123 there #tag', ['tag'], false))
         .toBe('- [ ] This there');
   })
 
   test('clear blocker with multiple sections', () => {
-    expect(H.clearBlockIDs('one\n# Header\n- [ ] one 🆔 Hello123 ⛔ Hello123 there #Tag\n\n# Other\n- [ ] two 🆔 Hello123 ⛔ Hello123 there #Tag\n', 'Tag', false))
+    expect(H.clearBlockIDs('one\n# Header\n- [ ] one 🆔 Hello123 ⛔ Hello123 there #tag\n\n# Other\n- [ ] two 🆔 Hello123 ⛔ Hello123 there #tag\n', ['tag'], false))
         .toBe('one\n# Header\n- [ ] one there\n\n# Other\n- [ ] two there\n')
   })
 
   test('empty task can be cleared', () => {
-    expect(H.clearBlockIDs('- [ ] 🆔 O7 ⛔ O6 #tag', 'tag', false))
+    expect(H.clearBlockIDs('- [ ] 🆔 O7 ⛔ O6 #tag', ['tag'], false))
         .toBe('- [ ] ')
   })
 })
 
 describe('testing of clearing tags from tasks', () => {
   test('leave tags on non task lines', () => {
-    expect(H.clearBlockIDs('Some #tag\nIn some lines\nwith the #tag there', 'tag', false)).toBe(
+    expect(H.clearBlockIDs('Some #tag\nIn some lines\nwith the #tag there', ['tag'], false)).toBe(
         'Some #tag\nIn some lines\nwith the #tag there'
     )
   })
 
   test('remove tags on task lines', () => {
-    expect(H.clearBlockIDs('- [ ] Some #tag\n- [ ] In some lines\n- [ ] with the #tag there', 'tag', false)).toBe(
+    expect(H.clearBlockIDs('- [ ] Some #tag\n- [ ] In some lines\n- [ ] with the #tag there', ['tag'], false)).toBe(
         '- [ ] Some\n- [ ] In some lines\n- [ ] with the there'
     )
   })
 
   test('remove tags on task lines and leave on non task', () => {
-    expect(H.clearBlockIDs('- [ ] Some #tag\nIn some lines #tag\n- [ ] with the #tag there', 'tag', false)).toBe(
+    expect(H.clearBlockIDs('- [ ] Some #tag\nIn some lines #tag\n- [ ] with the #tag there', ['tag'], false)).toBe(
         '- [ ] Some\nIn some lines #tag\n- [ ] with the there'
     )
   })
 
   test('leave other tags alone', () => {
-    expect(H.clearBlockIDs('- [ ] Some #tag\nIn some lines #tag\n- [ ] with the #tag there', 'othertag', false)).toBe(
+    expect(H.clearBlockIDs('- [ ] Some #tag\nIn some lines #tag\n- [ ] with the #tag there', ['othertag'], false)).toBe(
         '- [ ] Some #tag\nIn some lines #tag\n- [ ] with the #tag there'
     )
   })
@@ -183,13 +183,13 @@ describe('testing of clearing tags from tasks', () => {
         'In some lines #tag\n' +
         '- [ ] with the #tag there\n' +
         '\t- [ ] And #tag nested\n'
-    expect(H.clearBlockIDs(block, 'tag', false)).toBe(
+    expect(H.clearBlockIDs(block, ['tag'], false)).toBe(
         '\n- [ ] Some\nIn some lines #tag\n- [ ] with the there\n\t- [ ] And nested\n'
     )
   })
 
   test('single line', () => {
-    expect(H.clearBlockIDs('- [ ] Set available budget 🆔 BNC0 #Project', 'Project', false)).toBe(
+    expect(H.clearBlockIDs('- [ ] Set available budget 🆔 BNC0 #Project', ['Project'], false)).toBe(
         '- [ ] Set available budget'
     )
   })
@@ -199,7 +199,7 @@ describe('testing of clearing tags from tasks', () => {
         '- [ ] two #tag\n' +
         '- [ ] three #other #tag\n' +
         '- [ ] four #another  left\n' +
-        '- [ ] five #tag not a tag #other #another either\n', 'tag', true)
+        '- [ ] five #tag not a tag #other #another either\n', ['tag'], true)
     ).toBe(
         '- [ ] one\n' +
         '- [ ] two\n' +
@@ -214,7 +214,7 @@ describe('testing of clearing tags from tasks', () => {
         '- [ ] two #tag\n' +
         '- [ ] three #other #tag\n' +
         '- [ ] four #another left\n' +
-        '- [ ] five #tag not a tag #other #another either\n', '', true)
+        '- [ ] five #tag not a tag #other #another either\n', [], true)
     ).toBe(
         '- [ ] one\n' +
         '- [ ] two\n' +
@@ -329,17 +329,17 @@ describe('test getting the section name', () => {
 
 describe('testing the adding of block ids to some tasks', () => {
   test('empty file should be unchanged', () => {
-    expect(H.addTaskIDs('', 'Proj', 'Tag', true, false, 3, 0))
+    expect(H.addTaskIDs('', 'Proj', ['tag'], true, false, 3, 0))
         .toBe('')
   })
 
   test('file with no tasks should be unchanged', () => {
-    expect(H.addTaskIDs('this is a file\nwith no tasks\nso there', 'Proj', 'Tag', true, false, 3, 0))
+    expect(H.addTaskIDs('this is a file\nwith no tasks\nso there', 'Proj', ['tag'], true, false, 3, 0))
         .toBe('this is a file\nwith no tasks\nso there')
   })
 
   test('adding block ids to a line with them on already', () => {
-    expect(H.addTaskIDs('- [ ] 🆔 O7 ⛔ O6 #tag', 'O', 'tag', true, false, 3, 0))
+    expect(H.addTaskIDs('- [ ] 🆔 O7 ⛔ O6 #tag', 'O', ['tag'], true, false, 3, 0))
         .toBe('- [ ] 🆔 O0 #tag')
   })
 
@@ -349,7 +349,7 @@ describe('testing the adding of block ids to some tasks', () => {
         '- [ ] one\n' +
         '- [ ] two\n' +
         '\n' +
-        '- [ ] three\n', 'Proj', '', true, false, 3, 0))
+        '- [ ] three\n', 'Proj', [], true, false, 3, 0))
         .toBe('\n\n- [ ] one 🆔 Proj0\n- [ ] two 🆔 Proj1 ⛔ Proj0\n\n- [ ] three 🆔 Proj2 ⛔ Proj1\n')
   })
 
@@ -359,17 +359,17 @@ describe('testing the adding of block ids to some tasks', () => {
         '- [ ] one\n' +
         '- [ ] two\n' +
         '\n' +
-        '- [ ] three\n', 'Proj', 'Tag', true, false, 3, 0))
-        .toBe('\n\n- [ ] one 🆔 Proj0 #Tag\n- [ ] two 🆔 Proj1 ⛔ Proj0 #Tag\n\n- [ ] three 🆔 Proj2 ⛔ Proj1 #Tag\n')
+        '- [ ] three\n', 'Proj', ['tag'], true, false, 3, 0))
+        .toBe('\n\n- [ ] one 🆔 Proj0 #tag\n- [ ] two 🆔 Proj1 ⛔ Proj0 #tag\n\n- [ ] three 🆔 Proj2 ⛔ Proj1 #tag\n')
   })
 
   test('line with task and sequential start set', () => {
-    expect(H.addTaskIDs('- [ ] one', 'Proj', '', true, false, 3, 10))
+    expect(H.addTaskIDs('- [ ] one', 'Proj', [], true, false, 3, 10))
         .toBe('- [ ] one 🆔 Proj10')
   })
 
   test('two lines with task and prefix', () => {
-    let result = H.addTaskIDs('- [ ] one\n- [ ] two', 'Proj', '', true, true, 3, 10);
+    let result = H.addTaskIDs('- [ ] one\n- [ ] two', 'Proj', [], true, true, 3, 10);
     let match = /- \[ ] one 🆔 Proj(\d\d\d)\n- \[ ] two 🆔 Proj\d\d\d ⛔ Proj\1/m
     expect(match.test(result)).toBeTruthy()
   })
@@ -378,7 +378,7 @@ describe('testing the adding of block ids to some tasks', () => {
     expect(H.addTaskIDs('- [ ] one\n' +
         '\t- [ ] two\n' +
         '\t- [ ] three\n' +
-        '- [ ] four\n', 'F', 'tag', true, false, 3, 0))
+        '- [ ] four\n', 'F', ['tag'], true, false, 3, 0))
         .toBe('- [ ] one 🆔 F0 #tag\n' +
             '\t- [ ] two 🆔 F1 ⛔ F0 #tag\n' +
             '\t- [ ] three 🆔 F2 ⛔ F0 #tag\n' +
@@ -395,7 +395,7 @@ describe('testing the adding of block ids to some tasks', () => {
         '\t\t- [ ] five\n' +
         '\t- [ ] six\n' +
         '- [ ] seven\n' +
-        '- [ ] eight', 'F', 'tag', true, false, 3, 0))
+        '- [ ] eight', 'F', ['tag'], true, false, 3, 0))
         .toBe('- [ ] one 🆔 F0 #tag\n' +
             '\t- [ ] two 🆔 F1 ⛔ F0 #tag\n' +
             '\t- [ ] three 🆔 F2 ⛔ F0 #tag\n' +
@@ -411,7 +411,7 @@ describe('testing the adding of block ids to some tasks', () => {
     expect(H.addTaskIDs('- [ ] one\n' +
         '\t- [ ] two\n' +
         '\t- [ ] three\n' +
-        '- [ ] four\n', 'F', 'tag', false, false, 3, 0))
+        '- [ ] four\n', 'F', ['tag'], false, false, 3, 0))
         .toBe('- [ ] one 🆔 F0 #tag\n' +
             '\t- [ ] two 🆔 F1 ⛔ F0 #tag\n' +
             '\t- [ ] three 🆔 F2 ⛔ F1 #tag\n' +
@@ -428,7 +428,7 @@ describe('testing the adding of block ids to some tasks', () => {
         '\t\t- [ ] five\n' +
         '\t- [ ] six\n' +
         '- [ ] seven\n' +
-        '- [ ] eight', 'F', 'tag', false, false, 3, 0))
+        '- [ ] eight', 'F', ['tag'], false, false, 3, 0))
         .toBe('- [ ] one 🆔 F0 #tag\n' +
             '\t- [ ] two 🆔 F1 ⛔ F0 #tag\n' +
             '\t- [ ] three 🆔 F2 ⛔ F1 #tag\n' +
@@ -441,14 +441,24 @@ describe('testing the adding of block ids to some tasks', () => {
   })
 
   test('adding block ids should preserve existing indentation', () => {
-    expect(H.addTaskIDs('- [ ] one\n\ttwo\n\t\tthree\n- [ ] four', 'F', '', false, false, 3, 0)).toBe(
+    expect(H.addTaskIDs('- [ ] one\n\ttwo\n\t\tthree\n- [ ] four', 'F', [], false, false, 3, 0)).toBe(
            '- [ ] one 🆔 F0\n\ttwo\n\t\tthree\n- [ ] four 🆔 F1 ⛔ F0'
     )
   })
 
   test('adding block ids should retain existing tags', () => {
-    expect(H.addTaskIDs('- [ ] #one', 'F', '', false, false, 1, 0))
+    expect(H.addTaskIDs('- [ ] #one', 'F', [], false, false, 1, 0))
         .toBe('- [ ] #one 🆔 F0')
+  })
+
+  test('adding multiple tags to a task line', () => {
+    expect(H.addTaskIDs('- [ ] this', 'F', ['one', 'two'], false, false, 2, 0))
+        .toBe('- [ ] this 🆔 F0 #one #two')
+  })
+
+  test('adding multiple tags to a task line should not duplicate', () => {
+    expect(H.addTaskIDs('- [ ] #one this', 'F', ['one', 'two'], false, false, 2, 0))
+        .toBe('- [ ] this 🆔 F0 #one #two')
   })
 
 })

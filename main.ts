@@ -34,10 +34,9 @@ interface ProjectTasksSettings {
     sequentialStartNumber: number;
     removeVowels: boolean;
     firstLettersOfWords: boolean;
-    automaticTagName: string;
+    automaticTagNames: string[];
     clearAllTags: boolean;
     nestedTaskBehavior: NestingBehaviour;
-
 }
 
 const DEFAULT_SETTINGS: ProjectTasksSettings = {
@@ -47,7 +46,7 @@ const DEFAULT_SETTINGS: ProjectTasksSettings = {
     sequentialStartNumber: 1,
     removeVowels: false,
     firstLettersOfWords: false,
-    automaticTagName: "Project",
+    automaticTagNames: ["Project"],
     clearAllTags: false,
     nestedTaskBehavior: NestingBehaviour.ParallelExecution,
 }
@@ -66,7 +65,7 @@ export default class ProjectTasks extends Plugin {
             name: "Set project ids on Selection",
             editorCallback: (editor, view) => {
                 let sel = editor.getSelection();
-                let lines = Helper.addTaskIDs(sel, this.getPrefix(editor, view), this.settings.automaticTagName, this.settings.nestedTaskBehavior == NestingBehaviour.ParallelExecution, this.settings.idPrefixMethod == PrefixMethod.UsePrefix, this.settings.randomIDLength, this.settings.sequentialStartNumber);
+                let lines = Helper.addTaskIDs(sel, this.getPrefix(editor, view), this.settings.automaticTagNames, this.settings.nestedTaskBehavior == NestingBehaviour.ParallelExecution, this.settings.idPrefixMethod == PrefixMethod.UsePrefix, this.settings.randomIDLength, this.settings.sequentialStartNumber);
                 editor.replaceSelection(
                     `${lines}`
                 );
@@ -78,7 +77,7 @@ export default class ProjectTasks extends Plugin {
             name: "Clear project ids on Selection",
             editorCallback: (editor, view) => {
                 let sel = editor.getSelection();
-                let lines = Helper.clearBlockIDs(sel, this.settings.automaticTagName, this.settings.clearAllTags);
+                let lines = Helper.clearBlockIDs(sel, this.settings.automaticTagNames, this.settings.clearAllTags);
                 editor.replaceSelection(
                     `${lines}`
                 );
@@ -117,7 +116,7 @@ export default class ProjectTasks extends Plugin {
                 let range_from = {line: 0, ch: 0}
                 let range_to = {line: last_line, ch: editor.getLine(last_line).length}
                 let sel = editor.getRange(range_from, range_to);
-                let lines = Helper.clearBlockIDs(sel, this.settings.automaticTagName, this.settings.clearAllTags);
+                let lines = Helper.clearBlockIDs(sel, this.settings.automaticTagNames, this.settings.clearAllTags);
                 editor.replaceRange(
                     `${lines}`,
                     range_from,
@@ -134,7 +133,7 @@ export default class ProjectTasks extends Plugin {
     addActiveProjectList(editor: Editor) {
         // A view to show active tasks
         const active_tasks_view = `\`\`\`tasks
-tags includes #${this.settings.automaticTagName}
+tags includes #${this.settings.automaticTagNames}
 not done
 hide backlink
 is not blocked
@@ -156,9 +155,9 @@ is not blocked
 
         let lines;
         if (add_ids) {
-            lines = Helper.addTaskIDs(blockContent, prefix, this.settings.automaticTagName, this.settings.nestedTaskBehavior == NestingBehaviour.ParallelExecution, this.settings.idPrefixMethod == PrefixMethod.UsePrefix, this.settings.randomIDLength, this.settings.sequentialStartNumber)
+            lines = Helper.addTaskIDs(blockContent, prefix, this.settings.automaticTagNames, this.settings.nestedTaskBehavior == NestingBehaviour.ParallelExecution, this.settings.idPrefixMethod == PrefixMethod.UsePrefix, this.settings.randomIDLength, this.settings.sequentialStartNumber)
         } else {
-            lines = Helper.clearBlockIDs(blockContent, this.settings.automaticTagName, this.settings.clearAllTags);
+            lines = Helper.clearBlockIDs(blockContent, this.settings.automaticTagNames, this.settings.clearAllTags);
         }
 
         if (DEBUG) console.log(`Start ${blockStart}, End ${blockEnd}, last length ${last_line_length}\nOrig: ${blockContent}\nNew: ${lines}`);
@@ -291,13 +290,17 @@ class ProjectTasksSettingsTab extends PluginSettingTab {
         new Setting(containerEl)
             .setName('Automatically add Tag')
             .setDesc('A tag to add to each task - do not include the # symbol')
-            .addText(text => text
-                .setValue(this.plugin.settings.automaticTagName)
-                .setPlaceholder("Tag Name")
-                .onChange(async (value) => {
-                    this.plugin.settings.automaticTagName = value.replaceAll('#', '');
-                    await this.plugin.saveSettings();
-                }));
+            .addTextArea((text) => {
+                text.setValue(this.plugin.settings.automaticTagNames.join('\n'))
+                    .onChange((value) => {
+                        value = value.replaceAll('#', '');
+                        this.plugin.settings.automaticTagNames = value.split('\n').filter(line => line.trim() !== '');
+                        this.plugin.saveSettings();
+                    }).then(textArea => {
+                        textArea.inputEl.style.width = "100%";
+                        textArea.inputEl.rows = 5;
+                    })
+            });
 
         new Setting(containerEl)
             .setName('Clear all tags from project tasks')
@@ -321,6 +324,7 @@ class ProjectTasksSettingsTab extends PluginSettingTab {
                         await this.plugin.saveSettings();
                     })
             });
+
     }
 }
 

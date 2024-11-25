@@ -5,7 +5,13 @@
   "sequentialStartNumber": 0,
   "removeVowels": true,
   "firstLettersOfWords": true,
-  "automaticTagName": "Act/Project",
+  "automaticTagNames": "Project",
   "clearAllTags": true,
-  "nestedTaskBehavior": "1"
+  "nestedTaskBehavior": "1",
+  "testList": [
+    "one",
+    "two",
+    "three"
+  ],
+  "automaticTagName": "Act/Project"
 }

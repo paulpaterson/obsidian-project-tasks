@@ -112,7 +112,7 @@ export default class Helper {
         return text;
     }
 
-    static clearBlockIDs(sel: string, automatic_tag: string, clear_all_tags: boolean) {
+    static clearBlockIDs(sel: string, automatic_tags: string[], clear_all_tags: boolean) {
         // Remove existing ID's
         let remove_id = /🆔\s[\w,]+[ \t]*/g;
         sel = sel.replaceAll(remove_id, '');
@@ -129,7 +129,7 @@ export default class Helper {
                 if (clear_all_tags) {
                     cleaned_text.push(parsed.task_prefix + parsed.removeAllTags());
                 } else {
-                    cleaned_text.push(parsed.task_prefix + parsed.removeTags([automatic_tag]));
+                    cleaned_text.push(parsed.task_prefix + parsed.removeTags(automatic_tags));
                 }
             } else {
                 cleaned_text.push(parsed.line_text);
@@ -188,10 +188,10 @@ export default class Helper {
         }
     }
 
-    static addTaskIDs(sel: string, prefix: string, automatic_tag: string, parallel: boolean, use_prefix: boolean,
+    static addTaskIDs(sel: string, prefix: string, automatic_tags: string[], parallel: boolean, use_prefix: boolean,
                       random_id_length: number, sequential_start: number) {
         // Clear all the existing block and project ID's
-        sel = Helper.clearBlockIDs(sel, automatic_tag, false);
+        sel = Helper.clearBlockIDs(sel, automatic_tags, false);
 
         if (DEBUG) console.log(`Replaced ids and blocks to give: ${sel}`);
 
@@ -253,8 +253,11 @@ export default class Helper {
                 }
 
                 // Add an automatic tag if we need it
-                if (automatic_tag) {
-                    this_line += ` #${automatic_tag}`;
+                for (const tag of automatic_tags) {
+                    let tag_text = ` #${tag}`;
+                    if (this_line.indexOf(tag_text) < 0) {
+                        this_line += tag_text;
+                    }
                 }
 
                 // Append this line
