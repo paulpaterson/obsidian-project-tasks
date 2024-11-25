@@ -504,4 +504,21 @@ describe('testing of individual line parsing', () => {
       expect(parsed.is_task).toBeFalsy();
       expect(parsed.line_text).toBe(line_body);
     })
+
+  test.each([
+      ['- [ ] no tags', 'no tags'],
+      ['- [ ] tag at #end', 'tag at'],
+      ['- [ ] #tag at start', 'at start'],
+      ['- [ ] tag #at  middle', 'tag  middle'],
+      ['- [ ] two #consecutive #tags', 'two'],
+      ['- [ ] two #consecutive #tags and then some', 'two and then some'],
+      ['- [ ] two #tags around #word', 'two around'],
+  ])('removing all tags from "%s"', (line, cleaned_line) => {
+      let parsed = H.parseLine(line);
+      expect(parsed.removeAllTags(parsed.line_text)).toBe(cleaned_line);
+  })
+
+  test('removing only certain tags from a line', () => {
+    expect('not implemented').toBe('good');
+  })
 })

@@ -27,6 +27,36 @@ class ParsedLine {
         this.line_text = line_text;
         this.nesting = nesting;
     }
+
+    getLineSplit(line: string) {
+        return line.split(/(\s+)/);
+    }
+
+    removeAllTags(line: string) {
+        let words = this.getLineSplit(line);
+        for (let idx = 0; idx < words.length; idx++) {
+            let word = words[idx];
+            if (word.trim().length != 0) {
+                // It is a word
+                if (word.startsWith('#')) {
+                    // It is a tag, so do not include it and eat the previous or following whitespace
+                    words[idx] = '';
+                    if (idx != 0) {
+                        words[idx - 1] = '';
+                    } else if (idx != words.length - 1) {
+                        words[idx + 1] = '';
+                    }
+                }
+            } else {
+                // This was whitespace
+                if (idx == words.length - 1) {
+                    // We should ignore this
+                    words[idx] = '';
+                }
+            }
+        }
+        return words.join('');
+    }
 }
 
 export default class Helper {
@@ -166,6 +196,7 @@ export default class Helper {
         let this_id;
 
         // Go through all the lines and add appropriate ID and block tags
+        // ToDo - refactor this to use the ParseLine method
         for (const match of matches) {
             if (!first) {
                 lines += "\n";
