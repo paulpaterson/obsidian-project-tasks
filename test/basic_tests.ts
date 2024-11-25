@@ -137,17 +137,18 @@ describe('testing of clearing of the block ID\'s from some text', () => {
 
 
   test('clear blocker and ID with numbers and tag', () => {
-    expect(H.clearBlockIDs('- [ ] This 🆔 Hello123 ⛔ Hello123 there #tag', 'tag')).toBe('- [ ] This there  ');
+    expect(H.clearBlockIDs('- [ ] This 🆔 Hello123 ⛔ Hello123 there #tag', 'tag'))
+        .toBe('- [ ] This there');
   })
 
   test('clear blocker with multiple sections', () => {
     expect(H.clearBlockIDs('one\n# Header\n- [ ] one 🆔 Hello123 ⛔ Hello123 there #Tag\n\n# Other\n- [ ] two 🆔 Hello123 ⛔ Hello123 there #Tag\n', 'Tag'))
-        .toBe('one\n# Header\n- [ ] one there  \n\n# Other\n- [ ] two there  \n')
+        .toBe('one\n# Header\n- [ ] one there\n\n# Other\n- [ ] two there\n')
   })
 
   test('empty task can be cleared', () => {
     expect(H.clearBlockIDs('- [ ] 🆔 O7 ⛔ O6 #tag', 'tag'))
-        .toBe('- [ ]  ')
+        .toBe('- [ ] ')
   })
 })
 
@@ -160,13 +161,13 @@ describe('testing of clearing tags from tasks', () => {
 
   test('remove tags on task lines', () => {
     expect(H.clearBlockIDs('- [ ] Some #tag\n- [ ] In some lines\n- [ ] with the #tag there', 'tag', false)).toBe(
-        '- [ ] Some  \n- [ ] In some lines\n- [ ] with the   there'
+        '- [ ] Some\n- [ ] In some lines\n- [ ] with the there'
     )
   })
 
   test('remove tags on task lines and leave on non task', () => {
     expect(H.clearBlockIDs('- [ ] Some #tag\nIn some lines #tag\n- [ ] with the #tag there', 'tag')).toBe(
-        '- [ ] Some  \nIn some lines #tag\n- [ ] with the   there'
+        '- [ ] Some\nIn some lines #tag\n- [ ] with the there'
     )
   })
 
@@ -183,13 +184,13 @@ describe('testing of clearing tags from tasks', () => {
         '- [ ] with the #tag there\n' +
         '\t- [ ] And #tag nested\n'
     expect(H.clearBlockIDs(block, 'tag')).toBe(
-        '\n- [ ] Some  \nIn some lines #tag\n- [ ] with the   there\n\t- [ ] And   nested\n'
+        '\n- [ ] Some\nIn some lines #tag\n- [ ] with the there\n\t- [ ] And nested\n'
     )
   })
 
   test('single line', () => {
     expect(H.clearBlockIDs('- [ ] Set available budget 🆔 BNC0 #Project', 'Project')).toBe(
-        '- [ ] Set available budget  '
+        '- [ ] Set available budget'
     )
   })
 
@@ -200,9 +201,9 @@ describe('testing of clearing tags from tasks', () => {
         '- [ ] four #another  left\n' +
         '- [ ] five #tag not a tag #other #another either\n', 'tag', true)
     ).toBe(
-        '- [ ] one  \n' +
-        '- [ ] two  \n' +
-        '- [ ] three  \n' +
+        '- [ ] one\n' +
+        '- [ ] two\n' +
+        '- [ ] three\n' +
         '- [ ] four  left\n' +
         '- [ ] five not a tag either\n',
     )
@@ -215,11 +216,11 @@ describe('testing of clearing tags from tasks', () => {
         '- [ ] four #another left\n' +
         '- [ ] five #tag not a tag #other #another either\n', '', true)
     ).toBe(
-        '- [ ] one  \n' +
-        '- [ ] two  \n' +
-        '- [ ] three  \n' +
-        '- [ ] four   left\n' +
-        '- [ ] five not a tag either \n',
+        '- [ ] one\n' +
+        '- [ ] two\n' +
+        '- [ ] three\n' +
+        '- [ ] four left\n' +
+        '- [ ] five not a tag either\n',
     )
   })
 })
@@ -478,20 +479,21 @@ describe('testing getting all the blocks in a file', () =>  {
 
 describe('testing of individual line parsing', () => {
   test.each([
-        ['- [ ] a task line', ' ', 'a task line', 0],
-        ['- [x] a task line', 'x', 'a task line', 0],
-        ['- [-] a task line', '-', 'a task line', 0],
-        ['- [/] a task line', '/', 'a task line', 0],
-        ['- [ ] ', ' ', '', 0],
-        ['- [ ]  ', ' ', ' ', 0],
-        ['- [ ] a #task line', ' ', 'a #task line', 0],
-        ['\t- [ ] a #task line', ' ', 'a #task line', 1],
-        ['\t\t- [ ] a #task line', ' ', 'a #task line', 2],
-    ])(`line is task "%s"`, (full_line, status, line_body, nesting: number) => {
+        ['- [ ] a task line', ' ', 'a task line', '- [ ] ', 0],
+        ['- [x] a task line', 'x', 'a task line', '- [x] ', 0],
+        ['- [-] a task line', '-', 'a task line', '- [-] ', 0],
+        ['- [/] a task line', '/', 'a task line', '- [/] ', 0],
+        ['- [ ] ', ' ', '', '- [ ] ', 0],
+        ['- [ ]  ', ' ', ' ', '- [ ] ', 0],
+        ['- [ ] a #task line', ' ', 'a #task line', '- [ ] ', 0],
+        ['\t- [ ] a #task line', ' ', 'a #task line', '\t- [ ] ', 1],
+        ['\t\t- [ ] a #task line', ' ', 'a #task line', '\t\t- [ ] ', 2],
+    ])(`line is task "%s"`, (full_line, status, line_body, task_prefix, nesting: number) => {
       let parsed = H.parseLine(full_line);
       expect(parsed.is_task).toBeTruthy();
       expect(parsed.status_type).toBe(status);
       expect(parsed.line_text).toBe(line_body);
+      expect(parsed.task_prefix).toBe(task_prefix);
       expect(parsed.nesting).toBe(nesting);
     })
 
@@ -515,7 +517,7 @@ describe('testing of individual line parsing', () => {
       ['- [ ] two #tags around #word', 'two around'],
   ])('removing all tags from "%s"', (line, cleaned_line) => {
       let parsed = H.parseLine(line);
-      expect(parsed.removeAllTags(parsed.line_text)).toBe(cleaned_line);
+      expect(parsed.removeAllTags()).toBe(cleaned_line);
   })
 
   test.each([
@@ -546,6 +548,6 @@ describe('testing of individual line parsing', () => {
       ],
   ])('removing specific tags from "%s", list %s', (line, removal_tags, cleaned_line) => {
       let parsed = H.parseLine(line);
-      expect(parsed.removeTags(parsed.line_text, removal_tags)).toBe(cleaned_line);
+      expect(parsed.removeTags(removal_tags)).toBe(cleaned_line);
   })
 })

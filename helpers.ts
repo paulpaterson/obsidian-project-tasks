@@ -16,28 +16,28 @@ interface SimpleEditor {
 }
 
 class ParsedLine {
-    is_task: boolean;
-    status_type: string;
-    line_text: string;
-    nesting: number;
+    public task_prefix: string;
 
-    constructor(is_task: boolean, status_type: string, line_text: string, nesting: number) {
-        this.is_task = is_task;
-        this.status_type = status_type;
-        this.line_text = line_text;
-        this.nesting = nesting;
+    constructor(public is_task: boolean, public status_type: string, public line_text: string,
+                public nesting: number) {
+        if (this.is_task) {
+            let indents = '\t'.repeat(nesting);
+            this.task_prefix = `${indents}- [${status_type}] `;
+        } else {
+            this.task_prefix = '';
+        }
     }
 
     getLineSplit(line: string) {
         return line.split(/(\s+)/);
     }
 
-    removeAllTags(line: string) {
-        return this.removeTags(line);
+    removeAllTags() {
+        return this.removeTags();
     }
 
-    removeTags(line: string, tags_to_remove?: string[]) {
-        let words = this.getLineSplit(line);
+    removeTags(tags_to_remove?: string[]) {
+        let words = this.getLineSplit(this.line_text);
         for (let idx = 0; idx < words.length; idx++) {
             let word = words[idx];
             if (word.trim().length != 0) {
@@ -121,16 +121,22 @@ export default class Helper {
         let remove_block = /⛔\s[\w,]+[ \t]*/g;
         sel = sel.replaceAll(remove_block, '');
 
-        // Remove existing tags
-        if (clear_all_tags) {
-            let remove_tag = new RegExp("^(\\s*-\\s\\[[ x\\-\\/]\]\\s.*?)(#\\w+)(\\s+#\\w+\s*)*(.*)$", "mg");;
-            sel = sel.replaceAll(remove_tag, '$1$4');
-        } else if (automatic_tag) {
-            let remove_tag = new RegExp("^(\\s*-\\s\\[[ x\\-\\/]\]\\s.*)(#" + automatic_tag + ")(.*)$", "mg");
-            sel = sel.replaceAll(remove_tag, '$1 $3');
+        // Remove the tags
+        let cleaned_text = [];
+        for (let line of sel.split(/\r?\n/)) {
+            let parsed = this.parseLine(line);
+            if (parsed.is_task) {
+                if (clear_all_tags) {
+                    cleaned_text.push(parsed.task_prefix + parsed.removeAllTags());
+                } else {
+                    cleaned_text.push(parsed.task_prefix + parsed.removeTags([automatic_tag]));
+                }
+            } else {
+                cleaned_text.push(parsed.line_text);
+            }
         }
 
-        return sel;
+        return cleaned_text.join('\n');
     }
 
     static getBlockEnd(editor: SimpleEditor) {
