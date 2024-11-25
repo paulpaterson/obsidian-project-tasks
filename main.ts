@@ -16,11 +16,6 @@ import Helper from "./helpers";
 // Turn on to allow debugging in the console
 const DEBUG = true;
 
-// Regex for block boundary
-// ToDo - this is duplicated in the Helper class, should refactor this
-const BLOCK_BOUNDARY = /^#+\s/;
-
-
 enum PrefixMethod {
     UsePrefix = '1',
     SectionName = '2',
