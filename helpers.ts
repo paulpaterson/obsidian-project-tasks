@@ -33,12 +33,17 @@ class ParsedLine {
     }
 
     removeAllTags(line: string) {
+        return this.removeTags(line);
+    }
+
+    removeTags(line: string, tags_to_remove?: string[]) {
         let words = this.getLineSplit(line);
         for (let idx = 0; idx < words.length; idx++) {
             let word = words[idx];
             if (word.trim().length != 0) {
-                // It is a word
-                if (word.startsWith('#')) {
+                // It is a valid tag we should be removing
+                let is_valid_tag = word.startsWith('#') && (!tags_to_remove || tags_to_remove.indexOf(word.slice(1)) >= 0)
+                if (is_valid_tag) {
                     // It is a tag, so do not include it and eat the previous or following whitespace
                     words[idx] = '';
                     if (idx != 0) {

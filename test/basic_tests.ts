@@ -518,7 +518,34 @@ describe('testing of individual line parsing', () => {
       expect(parsed.removeAllTags(parsed.line_text)).toBe(cleaned_line);
   })
 
-  test('removing only certain tags from a line', () => {
-    expect('not implemented').toBe('good');
+  test.each([
+      [
+        '- [ ] a list of #one #two #three #four and other #five',
+        [],
+        'a list of #one #two #three #four and other #five'
+      ],
+      [
+        '- [ ] a list of #one #two #three #four and other #five',
+        ['two'],
+        'a list of #one #three #four and other #five'
+      ],
+      [
+        '- [ ] a list of #one #two #three #four and other #five',
+        ['one'],
+        'a list of #two #three #four and other #five'
+      ],
+      [
+        '- [ ] a list of #one #two #three #four and other #five',
+        ['one', 'four', 'two'],
+        'a list of #three and other #five'
+      ],
+      [
+        '- [ ] a list of #one #two #three #four and other #five',
+        ['five', 'six'],
+        'a list of #one #two #three #four and other'
+      ],
+  ])('removing specific tags from "%s", list %s', (line, removal_tags, cleaned_line) => {
+      let parsed = H.parseLine(line);
+      expect(parsed.removeTags(parsed.line_text, removal_tags)).toBe(cleaned_line);
   })
 })
