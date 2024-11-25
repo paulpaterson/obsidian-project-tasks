@@ -388,14 +388,14 @@ describe('testing the adding of block ids to some tasks', () => {
   })
 
   test('nested tasks with extra nesting in parallel', () => {
-    expect(H.addTaskIDs('- [ ] one \n' +
-        '\t- [ ] two \n' +
-        '\t- [ ] three \n' +
-        '\t\t- [ ] four \n' +
-        '\t\t- [ ] five \n' +
-        '\t- [ ] six \n' +
-        '- [ ] seven \n' +
-        '- [ ] eight ', 'F', 'tag', true, false, 3, 0))
+    expect(H.addTaskIDs('- [ ] one\n' +
+        '\t- [ ] two\n' +
+        '\t- [ ] three\n' +
+        '\t\t- [ ] four\n' +
+        '\t\t- [ ] five\n' +
+        '\t- [ ] six\n' +
+        '- [ ] seven\n' +
+        '- [ ] eight', 'F', 'tag', true, false, 3, 0))
         .toBe('- [ ] one 🆔 F0 #tag\n' +
             '\t- [ ] two 🆔 F1 ⛔ F0 #tag\n' +
             '\t- [ ] three 🆔 F2 ⛔ F0 #tag\n' +
@@ -421,14 +421,14 @@ describe('testing the adding of block ids to some tasks', () => {
   })
 
   test('nested tasks extra nesting sequential', () => {
-    expect(H.addTaskIDs('- [ ] one \n' +
-        '\t- [ ] two \n' +
-        '\t- [ ] three \n' +
-        '\t\t- [ ] four \n' +
-        '\t\t- [ ] five \n' +
-        '\t- [ ] six \n' +
-        '- [ ] seven \n' +
-        '- [ ] eight ', 'F', 'tag', false, false, 3, 0))
+    expect(H.addTaskIDs('- [ ] one\n' +
+        '\t- [ ] two\n' +
+        '\t- [ ] three\n' +
+        '\t\t- [ ] four\n' +
+        '\t\t- [ ] five\n' +
+        '\t- [ ] six\n' +
+        '- [ ] seven\n' +
+        '- [ ] eight', 'F', 'tag', false, false, 3, 0))
         .toBe('- [ ] one 🆔 F0 #tag\n' +
             '\t- [ ] two 🆔 F1 ⛔ F0 #tag\n' +
             '\t- [ ] three 🆔 F2 ⛔ F1 #tag\n' +
@@ -441,7 +441,7 @@ describe('testing the adding of block ids to some tasks', () => {
   })
 
   test('adding block ids should preserve existing indentation', () => {
-    expect(H.addTaskIDs('- [ ] one \n\ttwo\n\t\tthree\n- [ ] four', 'F', '', false, false, 3, 0)).toBe(
+    expect(H.addTaskIDs('- [ ] one\n\ttwo\n\t\tthree\n- [ ] four', 'F', '', false, false, 3, 0)).toBe(
            '- [ ] one 🆔 F0\n\ttwo\n\t\tthree\n- [ ] four 🆔 F1 ⛔ F0'
     )
   })

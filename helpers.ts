@@ -190,14 +190,11 @@ export default class Helper {
 
     static addTaskIDs(sel: string, prefix: string, automatic_tag: string, parallel: boolean, use_prefix: boolean,
                       random_id_length: number, sequential_start: number) {
-        const regex = /^(\s*-\s\[[ x\-\/]\]\s)?(.*)$/mg;
-
         // Clear all the existing block and project ID's
         sel = Helper.clearBlockIDs(sel, automatic_tag, false);
 
         if (DEBUG) console.log(`Replaced ids and blocks to give: ${sel}`);
 
-        const matches = sel.matchAll(regex);
         let lines = "";
         let first = true;
         let idx = 0;
@@ -207,16 +204,16 @@ export default class Helper {
         let this_id;
 
         // Go through all the lines and add appropriate ID and block tags
-        // ToDo - refactor this to use the ParseLine method
-        for (const match of matches) {
+        for (const line of sel.split(/\r?\n/)) {
+            let match = this.parseLine(line);
             if (!first) {
                 lines += "\n";
             }
             // Is this a task line at all?
-            if (match[1]) {
+            if (match.is_task) {
                 // Watch out for changes in nesting
                 if (parallel) {
-                    let nesting_depth = Helper.getNestingLevel(match[1]);
+                    let nesting_depth = match.nesting;
                     if (nesting_depth > current_nesting) {
                         // Add a new level of nesting
                         current_nesting += 1;
@@ -242,10 +239,10 @@ export default class Helper {
                     this_id = `${prefix}${idx + sequential_start}`;
                 }
                 // Add the id into there
-                let cleaned_line = match[2].trim();
+                let cleaned_line = match.line_text;
                 // Add a space at the end if needed
                 if (cleaned_line != "") cleaned_line += " ";
-                this_line = `${match[1]}${cleaned_line}🆔 ${this_id}`;
+                this_line = `${match.task_prefix}${cleaned_line}🆔 ${this_id}`;
                 if (idx > 0) {
                     // Add the blocks after the very first task
                     if (is_parallel) {
@@ -272,7 +269,7 @@ export default class Helper {
                 if (DEBUG) console.log(`Nesting level ${current_nesting}, ids ${nesting_ids}`);
             } else {
                 // Not a task line so just keep it as is
-                lines += `${match[2]}`;
+                lines += match.line_text;
             }
             first = false;
         }
