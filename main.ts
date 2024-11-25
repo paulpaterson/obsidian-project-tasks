@@ -83,7 +83,7 @@ export default class ProjectTasks extends Plugin {
             name: "Clear project ids on Selection",
             editorCallback: (editor, view) => {
                 let sel = editor.getSelection();
-                let lines = Helper.clearBlockIDs(sel, this.settings.automaticTagName, false);
+                let lines = Helper.clearBlockIDs(sel, this.settings.automaticTagName, this.settings.clearAllTags);
                 editor.replaceSelection(
                     `${lines}`
                 );
@@ -122,7 +122,7 @@ export default class ProjectTasks extends Plugin {
                 let range_from = {line: 0, ch: 0}
                 let range_to = {line: last_line, ch: editor.getLine(last_line).length}
                 let sel = editor.getRange(range_from, range_to);
-                let lines = Helper.clearBlockIDs(sel, this.settings.automaticTagName, false);
+                let lines = Helper.clearBlockIDs(sel, this.settings.automaticTagName, this.settings.clearAllTags);
                 editor.replaceRange(
                     `${lines}`,
                     range_from,
@@ -163,7 +163,7 @@ is not blocked
         if (add_ids) {
             lines = Helper.addTaskIDs(blockContent, prefix, this.settings.automaticTagName, this.settings.nestedTaskBehavior == NestingBehaviour.ParallelExecution, this.settings.idPrefixMethod == PrefixMethod.UsePrefix, this.settings.randomIDLength, this.settings.sequentialStartNumber)
         } else {
-            lines = Helper.clearBlockIDs(blockContent, this.settings.automaticTagName, false);
+            lines = Helper.clearBlockIDs(blockContent, this.settings.automaticTagName, this.settings.clearAllTags);
         }
 
         if (DEBUG) console.log(`Start ${blockStart}, End ${blockEnd}, last length ${last_line_length}\nOrig: ${blockContent}\nNew: ${lines}`);
