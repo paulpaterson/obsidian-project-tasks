@@ -287,19 +287,19 @@ class ProjectTasksSettingsTab extends PluginSettingTab {
                     await this.plugin.saveSettings();
                 }));
 
+
         new Setting(containerEl)
             .setName('Automatically add Tag')
             .setDesc('A tag to add to each task - do not include the # symbol')
             .addTextArea((text) => {
                 text.setValue(this.plugin.settings.automaticTagNames.join('\n'))
                     .onChange((value) => {
-                        value = value.replaceAll('#', '');
                         this.plugin.settings.automaticTagNames = value.split('\n').filter(line => line.trim() !== '');
                         this.plugin.saveSettings();
                     }).then(textArea => {
-                        textArea.inputEl.style.width = "100%";
-                        textArea.inputEl.rows = 5;
-                    })
+                    textArea.inputEl.style.width = "100%";
+                    textArea.inputEl.rows = 5;
+                });
             });
 
         new Setting(containerEl)
@@ -324,6 +324,8 @@ class ProjectTasksSettingsTab extends PluginSettingTab {
                         await this.plugin.saveSettings();
                     })
             });
+
+
 
     }
 }
