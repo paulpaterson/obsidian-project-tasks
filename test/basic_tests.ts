@@ -441,10 +441,14 @@ describe('testing the adding of block ids to some tasks', () => {
   })
 
   test('adding block ids should preserve existing indentation', () => {
-    expect(H.addTaskIDs('- [ ] one \n\ttwo\n\t\tthree\n- [ ] four',
-        'F', '', false, false, 3, 0)).toBe(
+    expect(H.addTaskIDs('- [ ] one \n\ttwo\n\t\tthree\n- [ ] four', 'F', '', false, false, 3, 0)).toBe(
            '- [ ] one 🆔 F0\n\ttwo\n\t\tthree\n- [ ] four 🆔 F1 ⛔ F0'
     )
+  })
+
+  test('adding block ids should retain existing tags', () => {
+    expect(H.addTaskIDs('- [ ] #one', 'F', '', false, false, 1, 0))
+        .toBe('- [ ] #one 🆔 F0')
   })
 
 })

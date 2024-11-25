@@ -40,6 +40,7 @@ interface ProjectTasksSettings {
     removeVowels: boolean;
     firstLettersOfWords: boolean;
     automaticTagName: string;
+    clearAllTags: boolean;
     nestedTaskBehavior: NestingBehaviour;
 
 }
@@ -52,6 +53,7 @@ const DEFAULT_SETTINGS: ProjectTasksSettings = {
     removeVowels: false,
     firstLettersOfWords: false,
     automaticTagName: "Project",
+    clearAllTags: false,
     nestedTaskBehavior: NestingBehaviour.ParallelExecution,
 }
 
@@ -69,13 +71,7 @@ export default class ProjectTasks extends Plugin {
             name: "Set project ids on Selection",
             editorCallback: (editor, view) => {
                 let sel = editor.getSelection();
-                let lines = Helper.addTaskIDs(sel, this.getPrefix(editor, view),
-                    this.settings.automaticTagName,
-                    this.settings.nestedTaskBehavior == NestingBehaviour.ParallelExecution,
-                    this.settings.idPrefixMethod == PrefixMethod.UsePrefix,
-                    this.settings.randomIDLength,
-                    this.settings.sequentialStartNumber
-                );
+                let lines = Helper.addTaskIDs(sel, this.getPrefix(editor, view), this.settings.automaticTagName, this.settings.nestedTaskBehavior == NestingBehaviour.ParallelExecution, this.settings.idPrefixMethod == PrefixMethod.UsePrefix, this.settings.randomIDLength, this.settings.sequentialStartNumber);
                 editor.replaceSelection(
                     `${lines}`
                 );
@@ -165,13 +161,7 @@ is not blocked
 
         let lines;
         if (add_ids) {
-            lines = Helper.addTaskIDs(blockContent, prefix,
-                    this.settings.automaticTagName,
-                    this.settings.nestedTaskBehavior == NestingBehaviour.ParallelExecution,
-                    this.settings.idPrefixMethod == PrefixMethod.UsePrefix,
-                    this.settings.randomIDLength,
-                    this.settings.sequentialStartNumber
-                )
+            lines = Helper.addTaskIDs(blockContent, prefix, this.settings.automaticTagName, this.settings.nestedTaskBehavior == NestingBehaviour.ParallelExecution, this.settings.idPrefixMethod == PrefixMethod.UsePrefix, this.settings.randomIDLength, this.settings.sequentialStartNumber)
         } else {
             lines = Helper.clearBlockIDs(blockContent, this.settings.automaticTagName);
         }
@@ -311,6 +301,16 @@ class ProjectTasksSettingsTab extends PluginSettingTab {
                 .setPlaceholder("Tag Name")
                 .onChange(async (value) => {
                     this.plugin.settings.automaticTagName = value.replaceAll('#', '');
+                    await this.plugin.saveSettings();
+                }));
+
+        new Setting(containerEl)
+            .setName('Clear all tags from project tasks')
+            .setDesc('When clearing tags from project tasks clear all existing tags not just the automatically added ones')
+            .addToggle(text => text
+                .setValue(this.plugin.settings.clearAllTags)
+                .onChange(async (value) => {
+                    this.plugin.settings.clearAllTags = value;
                     await this.plugin.saveSettings();
                 }));
 

@@ -6,5 +6,6 @@
   "removeVowels": true,
   "firstLettersOfWords": true,
   "automaticTagName": "Act/Project",
+  "clearAllTags": true,
   "nestedTaskBehavior": "1"
 }
