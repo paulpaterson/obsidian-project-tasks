@@ -115,46 +115,46 @@ describe('testing the generation of a prefix from a string', () => {
 describe('testing of clearing of the block ID\'s from some text', () => {
   for (let char of ['🆔', '⛔']) {
     test(`clear ${char} block IDs end of line`, () => {
-      expect(H.clearBlockIDs(`This ${char} Hello`, 'tag')).toBe('This ');
+      expect(H.clearBlockIDs(`This ${char} Hello`, 'tag', false)).toBe('This ');
     })
 
     test(`clear ${char} block IDs beginning of line`, () => {
-      expect(H.clearBlockIDs(`${char} Hello there`, 'tag')).toBe('there');
+      expect(H.clearBlockIDs(`${char} Hello there`, 'tag', false)).toBe('there');
     })
 
     test(`clear ${char} block IDs middle of line`, () => {
-      expect(H.clearBlockIDs(`I said ${char} Hello there`, 'tag')).toBe('I said there');
+      expect(H.clearBlockIDs(`I said ${char} Hello there`, 'tag', false)).toBe('I said there');
     })
 
     test(`clear ${char} block IDs with numbers`, () => {
-      expect(H.clearBlockIDs(`This ${char} Hello123 there`, 'tag')).toBe('This there');
+      expect(H.clearBlockIDs(`This ${char} Hello123 there`, 'tag', false)).toBe('This there');
     })
   }
 
   test('clear blocker and ID with numbers', () => {
-    expect(H.clearBlockIDs('This 🆔 Hello123 ⛔ Hello123 there', 'tag')).toBe('This there');
+    expect(H.clearBlockIDs('This 🆔 Hello123 ⛔ Hello123 there', 'tag', false)).toBe('This there');
   })
 
 
   test('clear blocker and ID with numbers and tag', () => {
-    expect(H.clearBlockIDs('- [ ] This 🆔 Hello123 ⛔ Hello123 there #tag', 'tag'))
+    expect(H.clearBlockIDs('- [ ] This 🆔 Hello123 ⛔ Hello123 there #tag', 'tag', false))
         .toBe('- [ ] This there');
   })
 
   test('clear blocker with multiple sections', () => {
-    expect(H.clearBlockIDs('one\n# Header\n- [ ] one 🆔 Hello123 ⛔ Hello123 there #Tag\n\n# Other\n- [ ] two 🆔 Hello123 ⛔ Hello123 there #Tag\n', 'Tag'))
+    expect(H.clearBlockIDs('one\n# Header\n- [ ] one 🆔 Hello123 ⛔ Hello123 there #Tag\n\n# Other\n- [ ] two 🆔 Hello123 ⛔ Hello123 there #Tag\n', 'Tag', false))
         .toBe('one\n# Header\n- [ ] one there\n\n# Other\n- [ ] two there\n')
   })
 
   test('empty task can be cleared', () => {
-    expect(H.clearBlockIDs('- [ ] 🆔 O7 ⛔ O6 #tag', 'tag'))
+    expect(H.clearBlockIDs('- [ ] 🆔 O7 ⛔ O6 #tag', 'tag', false))
         .toBe('- [ ] ')
   })
 })
 
 describe('testing of clearing tags from tasks', () => {
   test('leave tags on non task lines', () => {
-    expect(H.clearBlockIDs('Some #tag\nIn some lines\nwith the #tag there', 'tag')).toBe(
+    expect(H.clearBlockIDs('Some #tag\nIn some lines\nwith the #tag there', 'tag', false)).toBe(
         'Some #tag\nIn some lines\nwith the #tag there'
     )
   })
@@ -166,13 +166,13 @@ describe('testing of clearing tags from tasks', () => {
   })
 
   test('remove tags on task lines and leave on non task', () => {
-    expect(H.clearBlockIDs('- [ ] Some #tag\nIn some lines #tag\n- [ ] with the #tag there', 'tag')).toBe(
+    expect(H.clearBlockIDs('- [ ] Some #tag\nIn some lines #tag\n- [ ] with the #tag there', 'tag', false)).toBe(
         '- [ ] Some\nIn some lines #tag\n- [ ] with the there'
     )
   })
 
   test('leave other tags alone', () => {
-    expect(H.clearBlockIDs('- [ ] Some #tag\nIn some lines #tag\n- [ ] with the #tag there', 'othertag')).toBe(
+    expect(H.clearBlockIDs('- [ ] Some #tag\nIn some lines #tag\n- [ ] with the #tag there', 'othertag', false)).toBe(
         '- [ ] Some #tag\nIn some lines #tag\n- [ ] with the #tag there'
     )
   })
@@ -183,13 +183,13 @@ describe('testing of clearing tags from tasks', () => {
         'In some lines #tag\n' +
         '- [ ] with the #tag there\n' +
         '\t- [ ] And #tag nested\n'
-    expect(H.clearBlockIDs(block, 'tag')).toBe(
+    expect(H.clearBlockIDs(block, 'tag', false)).toBe(
         '\n- [ ] Some\nIn some lines #tag\n- [ ] with the there\n\t- [ ] And nested\n'
     )
   })
 
   test('single line', () => {
-    expect(H.clearBlockIDs('- [ ] Set available budget 🆔 BNC0 #Project', 'Project')).toBe(
+    expect(H.clearBlockIDs('- [ ] Set available budget 🆔 BNC0 #Project', 'Project', false)).toBe(
         '- [ ] Set available budget'
     )
   })

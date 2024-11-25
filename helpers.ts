@@ -112,7 +112,7 @@ export default class Helper {
         return text;
     }
 
-    static clearBlockIDs(sel: string, automatic_tag: string, clear_all_tags: boolean = false) {
+    static clearBlockIDs(sel: string, automatic_tag: string, clear_all_tags: boolean) {
         // Remove existing ID's
         let remove_id = /🆔\s[\w,]+[ \t]*/g;
         sel = sel.replaceAll(remove_id, '');
@@ -193,7 +193,7 @@ export default class Helper {
         const regex = /^(\s*-\s\[[ x\-\/]\]\s)?(.*)$/mg;
 
         // Clear all the existing block and project ID's
-        sel = Helper.clearBlockIDs(sel, automatic_tag);
+        sel = Helper.clearBlockIDs(sel, automatic_tag, false);
 
         if (DEBUG) console.log(`Replaced ids and blocks to give: ${sel}`);
 
