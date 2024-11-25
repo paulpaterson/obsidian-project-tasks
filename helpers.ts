@@ -15,6 +15,20 @@ interface SimpleEditor {
     lineCount(): number
 }
 
+class ParsedLine {
+    is_task: boolean;
+    status_type: string;
+    line_text: string;
+    nesting: number;
+
+    constructor(is_task: boolean, status_type: string, line_text: string, nesting: number) {
+        this.is_task = is_task;
+        this.status_type = status_type;
+        this.line_text = line_text;
+        this.nesting = nesting;
+    }
+}
+
 export default class Helper {
     // Simple helper class that contains the business logic
     // of the app. This is extracted here to allow unit testing
@@ -63,7 +77,7 @@ export default class Helper {
         return text;
     }
 
-    static clearBlockIDs(sel: string, automatic_tag: string) {
+    static clearBlockIDs(sel: string, automatic_tag: string, clear_all_tags: boolean = false) {
         // Remove existing ID's
         let remove_id = /🆔\s[\w,]+[ \t]*/g;
         sel = sel.replaceAll(remove_id, '');
@@ -73,7 +87,10 @@ export default class Helper {
         sel = sel.replaceAll(remove_block, '');
 
         // Remove existing tags
-        if (automatic_tag) {
+        if (clear_all_tags) {
+            let remove_tag = new RegExp("^(\\s*-\\s\\[[ x\\-\\/]\]\\s.*?)(#\\w+)(\\s+#\\w+\s*)*(.*)$", "mg");;
+            sel = sel.replaceAll(remove_tag, '$1$4');
+        } else if (automatic_tag) {
             let remove_tag = new RegExp("^(\\s*-\\s\\[[ x\\-\\/]\]\\s.*)(#" + automatic_tag + ")(.*)$", "mg");
             sel = sel.replaceAll(remove_tag, '$1 $3');
         }
@@ -218,6 +235,24 @@ export default class Helper {
             first = false;
         }
         return lines;
+    }
+
+    static parseLine(line: string) {
+        const regex = /^(\s*-\s\[([ x\-\/])\]\s)?(.*)$/;
+        let match = regex.exec(line);
+        if (match) {
+            // Was an expected line
+            if (match[1]) {
+                // This is a task line
+                return new ParsedLine(true, match[2], match[3], this.getNestingLevel(line));
+            } else {
+                // This isn't a task line
+                return new ParsedLine(false, '', match[3], 0);
+            }
+        } else {
+            // Something went wrong here
+            throw new Error(`Line was not understood: "${line}"`);
+        }
     }
 
 }

@@ -1,4 +1,5 @@
 import Helper from "../helpers";
+import * as assert from "node:assert";
 
 let H = Helper;
 export let file: string[] = []
@@ -158,7 +159,7 @@ describe('testing of clearing tags from tasks', () => {
   })
 
   test('remove tags on task lines', () => {
-    expect(H.clearBlockIDs('- [ ] Some #tag\n- [ ] In some lines\n- [ ] with the #tag there', 'tag')).toBe(
+    expect(H.clearBlockIDs('- [ ] Some #tag\n- [ ] In some lines\n- [ ] with the #tag there', 'tag', false)).toBe(
         '- [ ] Some  \n- [ ] In some lines\n- [ ] with the   there'
     )
   })
@@ -192,6 +193,35 @@ describe('testing of clearing tags from tasks', () => {
     )
   })
 
+  test('clearing ids can cope with clearing all tags', () => {
+    expect(H.clearBlockIDs('- [ ] one #tag\n' +
+        '- [ ] two #tag\n' +
+        '- [ ] three #other #tag\n' +
+        '- [ ] four #another  left\n' +
+        '- [ ] five #tag not a tag #other #another either\n', 'tag', true)
+    ).toBe(
+        '- [ ] one  \n' +
+        '- [ ] two  \n' +
+        '- [ ] three  \n' +
+        '- [ ] four  left\n' +
+        '- [ ] five not a tag either\n',
+    )
+  })
+
+  test('clearing ids can cope with clearing all tags even if no automatic tag', () => {
+    expect(H.clearBlockIDs('- [ ] one #tag\n' +
+        '- [ ] two #tag\n' +
+        '- [ ] three #other #tag\n' +
+        '- [ ] four #another left\n' +
+        '- [ ] five #tag not a tag #other #another either\n', '', true)
+    ).toBe(
+        '- [ ] one  \n' +
+        '- [ ] two  \n' +
+        '- [ ] three  \n' +
+        '- [ ] four   left\n' +
+        '- [ ] five not a tag either \n',
+    )
+  })
 })
 
 describe('testing the block boundary detection', () => {
@@ -415,6 +445,7 @@ describe('testing the adding of block ids to some tasks', () => {
            '- [ ] one 🆔 F0\n\ttwo\n\t\tthree\n- [ ] four 🆔 F1 ⛔ F0'
     )
   })
+
 })
 
 describe('testing getting all the blocks in a file', () =>  {
@@ -443,4 +474,34 @@ describe('testing getting all the blocks in a file', () =>  {
         .toStrictEqual([0, 1, 3, 5, 6])
   })
 
+})
+
+describe('testing of individual line parsing', () => {
+  test.each([
+        ['- [ ] a task line', ' ', 'a task line', 0],
+        ['- [x] a task line', 'x', 'a task line', 0],
+        ['- [-] a task line', '-', 'a task line', 0],
+        ['- [/] a task line', '/', 'a task line', 0],
+        ['- [ ] ', ' ', '', 0],
+        ['- [ ]  ', ' ', ' ', 0],
+        ['- [ ] a #task line', ' ', 'a #task line', 0],
+        ['\t- [ ] a #task line', ' ', 'a #task line', 1],
+        ['\t\t- [ ] a #task line', ' ', 'a #task line', 2],
+    ])(`line is task "%s"`, (full_line, status, line_body, nesting: number) => {
+      let parsed = H.parseLine(full_line);
+      expect(parsed.is_task).toBeTruthy();
+      expect(parsed.status_type).toBe(status);
+      expect(parsed.line_text).toBe(line_body);
+      expect(parsed.nesting).toBe(nesting);
+    })
+
+  test.each([
+        ['a task line', 'a task line'],
+        ['\ta task line', '\ta task line'],
+        ['\t\ta task line', '\t\ta task line'],
+    ])(`line is not task "%s"`, (full_line, line_body) => {
+      let parsed = H.parseLine(full_line);
+      expect(parsed.is_task).toBeFalsy();
+      expect(parsed.line_text).toBe(line_body);
+    })
 })
