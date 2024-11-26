@@ -17,6 +17,9 @@ interface SimpleEditor {
     replaceRange(text: string, start: {line: number, ch: number}, end: {line: number, ch: number}): void;
 }
 
+// ToDo: need to refactor to allow passing the settings object around so that we can more easily break apart the doBlockUpdate
+
+
 class ParsedLine {
     public task_prefix: string;
 
