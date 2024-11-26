@@ -296,9 +296,8 @@ export default class Helper {
         return lines;
     }
 
-    static doBlockUpdate(editor: SimpleEditor, add_ids: boolean, filename: string, automatic_tags: string[],
-                                  prefix: string, parallel: boolean, use_prefix: boolean,
-                                  random_id_length: number, sequential_start: number, clear_all_tags: boolean) {
+    static blockUpdate(editor: SimpleEditor, filename: string, add_ids: boolean, settings: ProjectTasksSettings) {
+        const prefix = this.getPrefix(editor, filename, settings);
         const cursor = editor.getCursor();
         const line = editor.getLine(cursor.line);
 
@@ -312,9 +311,13 @@ export default class Helper {
 
         let lines;
         if (add_ids) {
-            lines = Helper.addTaskIDs(blockContent, prefix, automatic_tags, parallel, use_prefix, random_id_length, sequential_start)
+            lines = Helper.addTaskIDs(blockContent, prefix, settings.automaticTagNames,
+                settings.nestedTaskBehavior == NestingBehaviour.ParallelExecution,
+                settings.idPrefixMethod == PrefixMethod.UsePrefix,
+                settings.randomIDLength, settings.sequentialStartNumber)
         } else {
-            lines = Helper.clearBlockIDs(blockContent, automatic_tags, clear_all_tags);
+            lines = Helper.clearBlockIDs(blockContent, settings.automaticTagNames,
+                settings.clearAllTags);
         }
 
         if (DEBUG) console.log(`Start ${blockStart}, End ${blockEnd}, last length ${last_line_length}\nOrig: ${blockContent}\nNew: ${lines}`);

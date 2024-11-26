@@ -41,7 +41,7 @@ export default class ProjectTasks extends Plugin {
             id: "set-ids-block",
             name: "Set project ids on Block",
             editorCallback: (editor, view) => {
-                this.blockUpdate(editor, Helper.getPrefix(editor, this.getFilename(view), this.settings), true);
+                Helper.blockUpdate(editor, this.getFilename(view), true, this.settings);
             }
         })
 
@@ -49,7 +49,7 @@ export default class ProjectTasks extends Plugin {
             id: "clear-ids-block",
             name: "Clear project ids on Block",
             editorCallback: (editor, view) => {
-                this.blockUpdate(editor, Helper.getPrefix(editor, this.getFilename(view), this.settings), false);
+                Helper.blockUpdate(editor, this.getFilename(view), false, this.settings);
             }
         })
 
@@ -94,28 +94,7 @@ is not blocked
         editor.replaceSelection(active_tasks_view);
     }
 
-    blockUpdate(editor: Editor, prefix: string, add_ids: boolean) {
-        const cursor = editor.getCursor();
-        const line = editor.getLine(cursor.line);
 
-        // Get the block boundaries
-        let blockStart = Helper.getBlockStart(editor);
-        let blockEnd = Helper.getBlockEnd(editor);
-        let last_line_length = editor.getLine(blockEnd + 1).length;
-
-        const blockContent = editor.getRange({line: blockStart, ch: 0}, {line: blockEnd, ch: last_line_length});
-        if (DEBUG) console.log(`Start ${blockStart}, End ${blockEnd}, last length ${last_line_length}\nOrig: ${blockContent}`);
-
-        let lines;
-        if (add_ids) {
-            lines = Helper.addTaskIDs(blockContent, prefix, this.settings.automaticTagNames, this.settings.nestedTaskBehavior == NestingBehaviour.ParallelExecution, this.settings.idPrefixMethod == PrefixMethod.UsePrefix, this.settings.randomIDLength, this.settings.sequentialStartNumber)
-        } else {
-            lines = Helper.clearBlockIDs(blockContent, this.settings.automaticTagNames, this.settings.clearAllTags);
-        }
-
-        if (DEBUG) console.log(`Start ${blockStart}, End ${blockEnd}, last length ${last_line_length}\nOrig: ${blockContent}\nNew: ${lines}`);
-        editor.replaceRange(lines, {line: blockStart, ch: 0}, {line: blockEnd, ch: last_line_length});
-    }
 
     getFilename(view: MarkdownFileInfo) {
         if (!view.file?.name) {

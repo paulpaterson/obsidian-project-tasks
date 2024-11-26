@@ -5,6 +5,7 @@ import Helper, {DEFAULT_SETTINGS, PrefixMethod, ProjectTasksSettings} from "../h
 let H = Helper;
 export let file: string[] = [];
 export let editor: MockEditor;
+export let test_settings: ProjectTasksSettings;
 
 // A Class that implements an editor for use in unit tests
 class MockEditor {
@@ -32,7 +33,7 @@ class MockEditor {
     for (let idx = start.line + 1; idx < end.line - 1; idx++) {
       lines.push(this.getLine(idx));
     }
-    lines.push(this.getLine(end.line - 1).slice(0, end.ch - 1));
+    lines.push(this.getLine(end.line - 1).slice(0, end.ch));
     return lines.join('\n');
   }
 
@@ -68,7 +69,7 @@ class MockCursor {
 }
 
 function getEditor(lines: string[], current_line: number) {
-  return new MockEditor(lines, current_line);
+  return new MockEditor([...lines], current_line);
 }
 
 function getSettings(data: Partial<ProjectTasksSettings>) {
@@ -544,10 +545,16 @@ describe('testing getting all the blocks in a file', () =>  {
 
 })
 
-describe.skip('testing for adding ids to a single block in a file', () => {
+describe('testing for adding ids to a single block in a file', () => {
+  beforeEach(() => {
+    test_settings = getSettings({
+      idPrefixMethod: PrefixMethod.SectionName, firstLettersOfWords: true, automaticTagNames: [],
+      sequentialStartNumber: 0,
+    })
+  })
   test('in pre section block', () => {
     let ed = getEditor(TEST_FILE_1, 0);
-    H.doBlockUpdate(ed, true, 'The Filename', [], '', false, false, 1, 0, false);
+    H.blockUpdate(ed, 'The Filename', true, test_settings);
     let result = ed.lines.join('\n');
     expect(result)
         .toBe(
@@ -565,7 +572,7 @@ describe.skip('testing for adding ids to a single block in a file', () => {
 
   test('in section one', () => {
     let ed = getEditor(TEST_FILE_1, 3);
-    H.doBlockUpdate(ed, true, 'The Filename', [], '', false, false, 1, 0, false);
+    H.blockUpdate(ed, 'The Filename', true, test_settings);
     let result = ed.lines.join('\n');
     expect(result)
         .toBe(
@@ -583,7 +590,7 @@ describe.skip('testing for adding ids to a single block in a file', () => {
 
   test('in section two', () => {
     let ed = getEditor(TEST_FILE_1, 6);
-    H.doBlockUpdate(ed, true, 'The Filename', [], '', false, false, 1, 0, false);
+    H.blockUpdate(ed, 'The Filename', true, test_settings);
     let result = ed.lines.join('\n');
     expect(result)
         .toBe(
