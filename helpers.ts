@@ -12,7 +12,9 @@ interface SimpleEditor {
     // This interface is created to help with the functions here that need the Obsidian Editor
     getCursor(): SimpleCursor;
     getLine(n: number): string;
-    lineCount(): number
+    lineCount(): number;
+    getRange(start: {line: number, ch: number}, end: {line: number, ch: number}): string;
+    replaceRange(text: string, start: {line: number, ch: number}, end: {line: number, ch: number}): void;
 }
 
 class ParsedLine {
@@ -277,6 +279,37 @@ export default class Helper {
             first = false;
         }
         return lines;
+    }
+
+    static doBlockUpdate(editor: SimpleEditor, add_ids: boolean, filename: string, automatic_tags: string[],
+                                  prefix: string, parallel: boolean, use_prefix: boolean,
+                                  random_id_length: number, sequential_start: number, clear_all_tags: boolean) {
+        const cursor = editor.getCursor();
+        const line = editor.getLine(cursor.line);
+
+        // Get the block boundaries
+        let blockStart = Helper.getBlockStart(editor);
+        let blockEnd = Helper.getBlockEnd(editor);
+        let last_line_length = editor.getLine(blockEnd + 1).length;
+
+        const blockContent = editor.getRange({line: blockStart, ch: 0}, {line: blockEnd, ch: last_line_length});
+        if (DEBUG) console.log(`Start ${blockStart}, End ${blockEnd}, last length ${last_line_length}\nOrig: ${blockContent}`);
+
+        let lines;
+        if (add_ids) {
+            lines = Helper.addTaskIDs(blockContent, prefix, automatic_tags, parallel, use_prefix, random_id_length, sequential_start)
+        } else {
+            lines = Helper.clearBlockIDs(blockContent, automatic_tags, clear_all_tags);
+        }
+
+        if (DEBUG) console.log(`Start ${blockStart}, End ${blockEnd}, last length ${last_line_length}\nOrig: ${blockContent}\nNew: ${lines}`);
+        editor.replaceRange(lines, {line: blockStart, ch: 0}, {line: blockEnd, ch: last_line_length});
+    }
+
+    static getEntireConvertedFile(editor: SimpleEditor, filename: string, automatic_tags: string[],
+                                  prefix: string, parallel: boolean, use_prefix: boolean,
+                                  random_id_length: number, sequential_start: number, clear_all_tags: boolean) {
+        return '';
     }
 
     static parseLine(line: string) {

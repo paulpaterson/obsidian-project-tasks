@@ -14,12 +14,40 @@ class MockEditor {
   getCursor() {
     return this.cursor;
   }
+
   getLine(n: number) {
-    return this.lines[n];
+    // The Obsidian editor always seems to allow a return of a blank line after the lines[line_count] position
+    return (n >= this.lines.length) ? '' : this.lines[n];
   }
 
   lineCount() {
     return this.lines.length;
+  }
+
+  getRange(start: {line: number, ch: number}, end: {line: number, ch: number}) {
+    let lines = [this.getLine(start.line).slice(start.ch)];
+    for (let idx = start.line + 1; idx < end.line - 1; idx++) {
+      lines.push(this.getLine(idx));
+    }
+    lines.push(this.getLine(end.line - 1).slice(0, end.ch - 1));
+    return lines.join('\n');
+  }
+
+  replaceRange(text: string, start: {line: number, ch: number}, end: {line: number, ch: number}) {
+    // Get the lines of text from the string
+    let new_lines = text.split(/\n/);
+    // First remove the partial lines
+    this.lines[start.line] = this.getLine(start.line).slice(0, start.ch);
+    this.lines[end.line - 1] = this.getLine(end.line - 1).slice(end.ch + 1);
+    // Now add the start and end lines
+    this.lines[start.line] += new_lines[0];
+    if (new_lines.length > 1) this.lines[end.line - 1] = new_lines[new_lines.length - 1] + this.lines[end.line - 1];
+    // Now remove the middle lines
+    this.lines.splice(start.line + 1, end.line - start.line - 2);
+    // Now add the lines from the other
+    for (let idx = 0; idx < new_lines.length - 2; idx++) {
+      this.lines.splice(start.line + 1 + idx, 0, new_lines[idx + 1]);
+    }
   }
 }
 
@@ -34,6 +62,20 @@ class MockCursor {
 function getEditor(lines: string[], current_line: number) {
   return new MockEditor(lines, current_line);
 }
+
+
+let TEST_FILE_1 = [
+        '- [ ] one',
+        '- [ ] two',
+        '',
+        '# Section One',
+        '- [ ] three',
+        '- [ ] four',
+        '# Section Two',
+        '- [ ] five',
+        '- [ ] six',
+        ''
+];
 
 describe('testing determining the nesting level', () => {
   test('zero nesting level', () => {
@@ -487,6 +529,80 @@ describe('testing getting all the blocks in a file', () =>  {
   test('file with multiple sections that starts after the beginning', () => {
     expect(H.getAllBlockStarts(getEditor(['one', '# two', 'three', '# four', 'five', '# six', '# seven'],0)))
         .toStrictEqual([0, 1, 3, 5, 6])
+  })
+
+})
+
+describe('testing for adding ids to a single block in a file', () => {
+  test('in pre section block', () => {
+    let ed = getEditor(TEST_FILE_1, 0);
+    H.doBlockUpdate(ed, true, 'The Filename', [], '', false, false, 1, 0, false);
+    let result = ed.lines.join('\n');
+    expect(result)
+        .toBe(
+        '- [ ] one 🆔 TF0\n' +
+        '- [ ] two 🆔 TF1 ⛔ TF0\n' +
+        '\n' +
+        '# Section One\n' +
+        '- [ ] three\n' +
+        '- [ ] four\n' +
+        '# Section Two\n' +
+        '- [ ] five\n' +
+        '- [ ] six\n'
+        )
+  })
+
+  test('in section one', () => {
+    let ed = getEditor(TEST_FILE_1, 3);
+    H.doBlockUpdate(ed, true, 'The Filename', [], '', false, false, 1, 0, false);
+    let result = ed.lines.join('\n');
+    expect(result)
+        .toBe(
+        '- [ ] one\n' +
+        '- [ ] two\n' +
+        '\n' +
+        '# Section One\n' +
+        '- [ ] three 🆔 SO0\n' +
+        '- [ ] four 🆔 SO1 ⛔ SO0\n' +
+        '# Section Two\n' +
+        '- [ ] five\n' +
+        '- [ ] six\n'
+        )
+  })
+
+  test('in section two', () => {
+    let ed = getEditor(TEST_FILE_1, 6);
+    H.doBlockUpdate(ed, true, 'The Filename', [], '', false, false, 1, 0, false);
+    let result = ed.lines.join('\n');
+    expect(result)
+        .toBe(
+        '- [ ] one\n' +
+        '- [ ] two\n' +
+        '\n' +
+        '# Section One\n' +
+        '- [ ] three\n' +
+        '- [ ] four\n' +
+        '# Section Two\n' +
+        '- [ ] five 🆔 ST0\n' +
+        '- [ ] six 🆔 ST1 ⛔ ST0\n'
+        )
+  })
+})
+
+describe('testing for adding ids to all blocks in a file', () => {
+  test('file with using section as prefix', () => {
+    expect(H.getEntireConvertedFile(getEditor(TEST_FILE_1, 0), 'The Filename', [], '', false, false, 1, 0, false))  // filename, auto add tags, prefix, parallel, use_prefix, random id length, sequential start
+        .toBe(
+        '- [ ] one 🆔 TF0\n' +
+        '- [ ] two 🆔 TF1 ⛔ TF0\n' +
+        '\n' +
+        '# Section One\n' +
+        '- [ ] three 🆔 SO0\n' +
+        '- [ ] four 🆔 SO1 ⛔ SO0\n' +
+        '# Section Two\n' +
+        '- [ ] five 🆔 ST0\n' +
+        '- [ ] six 🆔 ST1 ⛔ ST0\n'
+        )
   })
 
 })

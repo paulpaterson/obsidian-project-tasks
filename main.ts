@@ -289,8 +289,8 @@ class ProjectTasksSettingsTab extends PluginSettingTab {
 
 
         new Setting(containerEl)
-            .setName('Automatically add Tag')
-            .setDesc('A tag to add to each task - do not include the # symbol')
+            .setName('Automatically add tags')
+            .setDesc('A list of tags (one per line) to add to each task - do not include the # symbol')
             .addTextArea((text) => {
                 text.setValue(this.plugin.settings.automaticTagNames.join('\n'))
                     .onChange((value) => {
