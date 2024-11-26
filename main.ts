@@ -1,55 +1,8 @@
-import {
-    App,
-    Editor,
-    EditorPosition, MarkdownFileInfo,
-    MarkdownView,
-    Modal,
-    Notice,
-    Plugin,
-    PluginSettingTab,
-    Setting,
-    View
-} from 'obsidian';
-import * as net from "net";
-import Helper from "./helpers";
+import {App, Editor, MarkdownFileInfo, Plugin, PluginSettingTab, Setting} from 'obsidian';
+import Helper, {DEFAULT_SETTINGS, NestingBehaviour, PrefixMethod, ProjectTasksSettings} from "./helpers";
 
 // Turn on to allow debugging in the console
 const DEBUG = true;
-
-enum PrefixMethod {
-    UsePrefix = '1',
-    SectionName = '2',
-    FileName = '3'
-}
-
-enum NestingBehaviour {
-    ParallelExecution = '1',
-    SequentialExecution = '2',
-}
-
-interface ProjectTasksSettings {
-    idPrefixMethod: PrefixMethod;
-    projectPrefix: string;
-    randomIDLength: number;
-    sequentialStartNumber: number;
-    removeVowels: boolean;
-    firstLettersOfWords: boolean;
-    automaticTagNames: string[];
-    clearAllTags: boolean;
-    nestedTaskBehavior: NestingBehaviour;
-}
-
-const DEFAULT_SETTINGS: ProjectTasksSettings = {
-    idPrefixMethod: PrefixMethod.UsePrefix,
-    projectPrefix: 'prj',
-    randomIDLength: 6,
-    sequentialStartNumber: 1,
-    removeVowels: false,
-    firstLettersOfWords: false,
-    automaticTagNames: ["Project"],
-    clearAllTags: false,
-    nestedTaskBehavior: NestingBehaviour.ParallelExecution,
-}
 
 
 export default class ProjectTasks extends Plugin {

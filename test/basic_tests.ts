@@ -6,6 +6,7 @@ import * as assert from "node:assert";
 let H = Helper;
 export let file: string[] = []
 
+// A Class that implements an editor for use in unit tests
 class MockEditor {
   lines: string[];
   cursor: MockCursor;

@@ -1,8 +1,42 @@
-import {Editor} from "obsidian";
-
 // Regex for block boundary
 const BLOCK_BOUNDARY = /^#+\s/;
 const DEBUG = true;
+
+
+export enum PrefixMethod {
+    UsePrefix = '1',
+    SectionName = '2',
+    FileName = '3'
+}
+
+export enum NestingBehaviour {
+    ParallelExecution = '1',
+    SequentialExecution = '2',
+}
+
+export interface ProjectTasksSettings {
+    idPrefixMethod: PrefixMethod;
+    projectPrefix: string;
+    randomIDLength: number;
+    sequentialStartNumber: number;
+    removeVowels: boolean;
+    firstLettersOfWords: boolean;
+    automaticTagNames: string[];
+    clearAllTags: boolean;
+    nestedTaskBehavior: NestingBehaviour;
+}
+
+export const DEFAULT_SETTINGS: ProjectTasksSettings = {
+    idPrefixMethod: PrefixMethod.UsePrefix,
+    projectPrefix: 'prj',
+    randomIDLength: 6,
+    sequentialStartNumber: 1,
+    removeVowels: false,
+    firstLettersOfWords: false,
+    automaticTagNames: ["Project"],
+    clearAllTags: false,
+    nestedTaskBehavior: NestingBehaviour.ParallelExecution,
+}
 
 interface SimpleCursor {
     line: number
