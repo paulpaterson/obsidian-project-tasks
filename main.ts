@@ -18,7 +18,7 @@ export default class ProjectTasks extends Plugin {
             name: "Set project ids on Selection",
             editorCallback: (editor, view) => {
                 let sel = editor.getSelection();
-                let lines = Helper.addTaskIDs(sel, this.getPrefix(editor, view), this.settings.automaticTagNames, this.settings.nestedTaskBehavior == NestingBehaviour.ParallelExecution, this.settings.idPrefixMethod == PrefixMethod.UsePrefix, this.settings.randomIDLength, this.settings.sequentialStartNumber);
+                let lines = Helper.addTaskIDs(sel, Helper.getPrefix(editor, this.getFilename(view), this.settings), this.settings.automaticTagNames, this.settings.nestedTaskBehavior == NestingBehaviour.ParallelExecution, this.settings.idPrefixMethod == PrefixMethod.UsePrefix, this.settings.randomIDLength, this.settings.sequentialStartNumber);
                 editor.replaceSelection(
                     `${lines}`
                 );
@@ -41,7 +41,7 @@ export default class ProjectTasks extends Plugin {
             id: "set-ids-block",
             name: "Set project ids on Block",
             editorCallback: (editor, view) => {
-                this.blockUpdate(editor, this.getPrefix(editor, view), true);
+                this.blockUpdate(editor, Helper.getPrefix(editor, this.getFilename(view), this.settings), true);
             }
         })
 
@@ -49,7 +49,7 @@ export default class ProjectTasks extends Plugin {
             id: "clear-ids-block",
             name: "Clear project ids on Block",
             editorCallback: (editor, view) => {
-                this.blockUpdate(editor, this.getPrefix(editor, view), false);
+                this.blockUpdate(editor, Helper.getPrefix(editor, this.getFilename(view), this.settings), false);
             }
         })
 
@@ -115,25 +115,6 @@ is not blocked
 
         if (DEBUG) console.log(`Start ${blockStart}, End ${blockEnd}, last length ${last_line_length}\nOrig: ${blockContent}\nNew: ${lines}`);
         editor.replaceRange(lines, {line: blockStart, ch: 0}, {line: blockEnd, ch: last_line_length});
-    }
-
-    getPrefix(editor: Editor, view: MarkdownFileInfo) {
-        let raw_prefix;
-        switch (this.settings.idPrefixMethod) {
-            case PrefixMethod.UsePrefix: {
-                raw_prefix = this.settings.projectPrefix;
-                break;
-            }
-            case PrefixMethod.FileName: {
-                raw_prefix = this.getFilename(view);
-                break;
-            }
-            case PrefixMethod.SectionName: {
-                // Try to find the name of the block that contains the cursor or the selection
-                raw_prefix = Helper.getSectionName(editor, this.getFilename(view));
-            }
-        }
-        return Helper.getPrefixFromString(raw_prefix, this.settings.firstLettersOfWords, this.settings.removeVowels);
     }
 
     getFilename(view: MarkdownFileInfo) {

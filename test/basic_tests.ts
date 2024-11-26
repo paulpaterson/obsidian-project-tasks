@@ -1,10 +1,10 @@
-import Helper from "../helpers";
-import * as assert from "node:assert";
+import Helper, {DEFAULT_SETTINGS, PrefixMethod, ProjectTasksSettings} from "../helpers";
 
 // ToDo: Remove the skipped tests when done with config migration
 
 let H = Helper;
-export let file: string[] = []
+export let file: string[] = [];
+export let editor: MockEditor;
 
 // A Class that implements an editor for use in unit tests
 class MockEditor {
@@ -52,6 +52,11 @@ class MockEditor {
       this.lines.splice(start.line + 1 + idx, 0, new_lines[idx + 1]);
     }
   }
+
+  atLine(line: number) {
+    this.cursor.line = line;
+    return this;
+  }
 }
 
 class MockCursor {
@@ -66,6 +71,9 @@ function getEditor(lines: string[], current_line: number) {
   return new MockEditor(lines, current_line);
 }
 
+function getSettings(data: Partial<ProjectTasksSettings>) {
+  return {...DEFAULT_SETTINGS, ...data};
+}
 
 let TEST_FILE_1 = [
         '- [ ] one',
@@ -684,3 +692,41 @@ describe('testing of individual line parsing', () => {
       expect(parsed.removeTags(removal_tags)).toBe(cleaned_line);
   })
 })
+
+describe('testing of the getPrefix logic', () => {
+  beforeAll(() => {
+    editor = getEditor(['one', '# Section Two', 'three', 'four', '# Section Five', 'six'], 0)
+  })
+  test('using fixed prefix', () => {
+    expect(H.getPrefix(editor, 'The File Name', getSettings({projectPrefix: 'Project'})))
+        .toBe('Project');
+  })
+
+  test('using filename', () => {
+    expect(H.getPrefix(editor, 'Project File', getSettings({idPrefixMethod: PrefixMethod.FileName})))
+        .toBe('ProjectFile');
+  })
+
+  test('using filename with first letters only', () => {
+    expect(H.getPrefix(editor, 'The File Name', getSettings({idPrefixMethod: PrefixMethod.FileName, firstLettersOfWords: true})))
+        .toBe('TFN');
+  })
+
+  test('using filename remove vowels', () => {
+    expect(H.getPrefix(editor, 'Test This Please', getSettings({idPrefixMethod: PrefixMethod.FileName, removeVowels: true})))
+        .toBe('TstThsPls');
+  })
+
+  test('using section name not in section', () => {
+    expect(H.getPrefix(editor.atLine(0), 'The File Name', getSettings({idPrefixMethod: PrefixMethod.SectionName, firstLettersOfWords: true})))
+        .toBe('TFN');
+  })
+
+  test('using section name in section', () => {
+    expect(H.getPrefix(editor.atLine(1), 'The File Name', getSettings({idPrefixMethod: PrefixMethod.SectionName, firstLettersOfWords: true})))
+        .toBe('ST');
+    expect(H.getPrefix(editor.atLine(4), 'The File Name', getSettings({idPrefixMethod: PrefixMethod.SectionName, firstLettersOfWords: true})))
+        .toBe('SF');
+  })
+})
+

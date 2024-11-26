@@ -1,4 +1,6 @@
 // Regex for block boundary
+import {Editor, MarkdownFileInfo} from "obsidian";
+
 const BLOCK_BOUNDARY = /^#+\s/;
 const DEBUG = true;
 
@@ -125,30 +127,6 @@ export default class Helper {
       }
 
       return randomString;
-    }
-
-    static getPrefixFromString(text: string, first_letters: boolean, remove_vowels: boolean) {
-        // Remove any special signs
-        text = text.replaceAll(/[#\[\]]/g, '');
-        // Break into words
-        let words = text.split(/\s+/);
-        text = "";
-        for (let word of words) {
-            if (word) {
-                text = `${text}${word[0].toUpperCase()}`;
-                if (!first_letters) {
-                    let remainder = word.slice(1);
-                    // Remove vowels if needed
-                    if (remove_vowels) {
-                        remainder = remainder.replaceAll(/[aeiou]/g, '');
-                    }
-                    text = `${text}${remainder}`;
-                }
-            }
-        }
-        // Remove spaces
-        text = text.replaceAll(' ', '');
-        return text;
     }
 
     static clearBlockIDs(sel: string, automatic_tags: string[], clear_all_tags: boolean) {
@@ -367,4 +345,47 @@ export default class Helper {
         }
     }
 
+
+    static getPrefix(editor: SimpleEditor, filename: string, settings: ProjectTasksSettings) {
+        let raw_prefix;
+        switch (settings.idPrefixMethod) {
+            case PrefixMethod.UsePrefix: {
+                raw_prefix = settings.projectPrefix;
+                break;
+            }
+            case PrefixMethod.FileName: {
+                raw_prefix = filename;
+                break;
+            }
+            case PrefixMethod.SectionName: {
+                // Try to find the name of the block that contains the cursor or the selection
+                raw_prefix = Helper.getSectionName(editor, filename);
+            }
+        }
+        return Helper.getPrefixFromString(raw_prefix, settings.firstLettersOfWords, settings.removeVowels);
+    }
+
+    static getPrefixFromString(text: string, first_letters: boolean, remove_vowels: boolean) {
+        // Remove any special signs
+        text = text.replaceAll(/[#\[\]]/g, '');
+        // Break into words
+        let words = text.split(/\s+/);
+        text = "";
+        for (let word of words) {
+            if (word) {
+                text = `${text}${word[0].toUpperCase()}`;
+                if (!first_letters) {
+                    let remainder = word.slice(1);
+                    // Remove vowels if needed
+                    if (remove_vowels) {
+                        remainder = remainder.replaceAll(/[aeiou]/g, '');
+                    }
+                    text = `${text}${remainder}`;
+                }
+            }
+        }
+        // Remove spaces
+        text = text.replaceAll(' ', '');
+        return text;
+    }
 }
