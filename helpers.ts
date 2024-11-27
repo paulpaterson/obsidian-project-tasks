@@ -1,6 +1,3 @@
-// Regex for block boundary
-import {Editor, MarkdownFileInfo} from "obsidian";
-
 // ToDo document set-ids-file
 // ToDo document clear all tags
 // ToDo document adding multiple tags
@@ -134,6 +131,7 @@ export default class Helper {
     }
 
     static clearBlockIDs(sel: string, automatic_tags: string[], clear_all_tags: boolean) {
+        // ToDo refactor clearBlockIDs to use settings
         // Remove existing ID's
         let remove_id = /🆔\s[\w,]+[ \t]*/g;
         sel = sel.replaceAll(remove_id, '');
@@ -211,6 +209,7 @@ export default class Helper {
 
     static addTaskIDs(sel: string, prefix: string, automatic_tags: string[], parallel: boolean, use_prefix: boolean,
                       random_id_length: number, sequential_start: number) {
+        // ToDo refactor addTaskIDs to use the settings
         // Clear all the existing block and project ID's
         sel = Helper.clearBlockIDs(sel, automatic_tags, false);
 
@@ -302,7 +301,6 @@ export default class Helper {
 
     static blockUpdate(editor: SimpleEditor, filename: string, add_ids: boolean, settings: ProjectTasksSettings,) {
         const prefix = this.getPrefix(editor, filename, settings);
-        const line = editor.getLine(editor.getCursor().line);
 
         // Get the block boundaries
         let blockStart = Helper.getBlockStart(editor);
@@ -337,7 +335,7 @@ export default class Helper {
     }
 
     static parseLine(line: string) {
-        const regex = /^(\s*-\s\[([ x\-\/])\]\s)?(.*)$/;
+        const regex = /^(\s*-\s\[([ x\-\/])]\s)?(.*)$/;
         let match = regex.exec(line);
         if (match) {
             // Was an expected line
