@@ -42,6 +42,7 @@ export const DEFAULT_SETTINGS: ProjectTasksSettings = {
 
 interface SimpleCursor {
     line: number
+    ch: number
 }
 
 interface SimpleEditor {
@@ -51,6 +52,7 @@ interface SimpleEditor {
     lineCount(): number;
     getRange(start: {line: number, ch: number}, end: {line: number, ch: number}): string;
     replaceRange(text: string, start: {line: number, ch: number}, end: {line: number, ch: number}): void;
+    setCursor(cursor: {line: number, ch: number}): void;
 }
 
 // ToDo: need to refactor to allow passing the settings object around so that we can more easily break apart the doBlockUpdate
@@ -296,10 +298,9 @@ export default class Helper {
         return lines;
     }
 
-    static blockUpdate(editor: SimpleEditor, filename: string, add_ids: boolean, settings: ProjectTasksSettings) {
+    static blockUpdate(editor: SimpleEditor, filename: string, add_ids: boolean, settings: ProjectTasksSettings,) {
         const prefix = this.getPrefix(editor, filename, settings);
-        const cursor = editor.getCursor();
-        const line = editor.getLine(cursor.line);
+        const line = editor.getLine(editor.getCursor().line);
 
         // Get the block boundaries
         let blockStart = Helper.getBlockStart(editor);
@@ -324,10 +325,13 @@ export default class Helper {
         editor.replaceRange(lines, {line: blockStart, ch: 0}, {line: blockEnd, ch: last_line_length});
     }
 
-    static getEntireConvertedFile(editor: SimpleEditor, filename: string, automatic_tags: string[],
-                                  prefix: string, parallel: boolean, use_prefix: boolean,
-                                  random_id_length: number, sequential_start: number, clear_all_tags: boolean) {
-        return '';
+    static getEntireConvertedFile(editor: SimpleEditor, filename: string, settings: ProjectTasksSettings) {
+        let initial_cursor = editor.getCursor()
+        for (let block_start of this.getAllBlockStarts(editor)) {
+            editor.setCursor({line: block_start, ch: 0});
+            this.blockUpdate(editor, filename, true, settings);
+        }
+        editor.setCursor({line: initial_cursor.line, ch: initial_cursor.ch});
     }
 
     static parseLine(line: string) {

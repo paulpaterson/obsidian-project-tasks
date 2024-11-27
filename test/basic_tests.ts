@@ -58,12 +58,18 @@ class MockEditor {
     this.cursor.line = line;
     return this;
   }
+
+  setCursor(cursor: {line: number, ch: number}) {
+    this.cursor = new MockCursor(cursor.line);
+  }
 }
 
 class MockCursor {
   line: number;
+  ch: number;
   constructor(n: number) {
     this.line = n;
+    this.ch = 0;
   }
 
 }
@@ -608,8 +614,16 @@ describe('testing for adding ids to a single block in a file', () => {
 })
 
 describe('testing for adding ids to all blocks in a file', () => {
-  test.skip('file with using section as prefix', () => {
-    expect(H.getEntireConvertedFile(getEditor(TEST_FILE_1, 0), 'The Filename', [], '', false, false, 1, 0, false))  // filename, auto add tags, prefix, parallel, use_prefix, random id length, sequential start
+  beforeEach(() => {
+    test_settings = getSettings({
+      idPrefixMethod: PrefixMethod.SectionName, firstLettersOfWords: true, automaticTagNames: [],
+      sequentialStartNumber: 0,
+    })
+  })
+  test('file with using section as prefix', () => {
+    let editor = getEditor(TEST_FILE_1, 0);
+    H.getEntireConvertedFile(editor, 'The Filename', test_settings);
+    expect(editor.lines.join('\n'))
         .toBe(
         '- [ ] one 🆔 TF0\n' +
         '- [ ] two 🆔 TF1 ⛔ TF0\n' +
