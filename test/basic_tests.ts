@@ -1,7 +1,5 @@
 import Helper, {DEFAULT_SETTINGS, PrefixMethod, ProjectTasksSettings} from "../helpers";
 
-// ToDo: Remove the skipped tests when done with config migration
-
 let H = Helper;
 export let file: string[] = [];
 export let editor: MockEditor;

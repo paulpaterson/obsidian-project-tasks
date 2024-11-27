@@ -26,6 +26,23 @@ export default class ProjectTasks extends Plugin {
         });
 
         this.addCommand({
+            id: "set-ids-block",
+            name: "Set project ids on Block",
+            editorCallback: (editor, view) => {
+                Helper.blockUpdate(editor, this.getFilename(view), true, this.settings);
+            }
+        })
+
+
+        this.addCommand({
+            id: "add-project-task-list",
+            name: "Add active project task list",
+            editorCallback: (editor, view) => {
+                this.addActiveProjectList(editor);
+            }
+        })
+
+        this.addCommand({
             id: "clear-ids",
             name: "Clear project ids on Selection",
             editorCallback: (editor, view) => {
@@ -38,26 +55,10 @@ export default class ProjectTasks extends Plugin {
         });
 
         this.addCommand({
-            id: "set-ids-block",
-            name: "Set project ids on Block",
-            editorCallback: (editor, view) => {
-                Helper.blockUpdate(editor, this.getFilename(view), true, this.settings);
-            }
-        })
-
-        this.addCommand({
             id: "clear-ids-block",
             name: "Clear project ids on Block",
             editorCallback: (editor, view) => {
                 Helper.blockUpdate(editor, this.getFilename(view), false, this.settings);
-            }
-        })
-
-        this.addCommand({
-            id: "add-project-task-list",
-            name: "Add active project task list",
-            editorCallback: (editor, view) => {
-                this.addActiveProjectList(editor);
             }
         })
 
