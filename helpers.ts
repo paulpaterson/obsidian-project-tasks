@@ -1,6 +1,10 @@
 // Regex for block boundary
 import {Editor, MarkdownFileInfo} from "obsidian";
 
+// ToDo document set-ids-file
+// ToDo document clear all tags
+// ToDo document adding multiple tags
+
 const BLOCK_BOUNDARY = /^#+\s/;
 const DEBUG = true;
 
