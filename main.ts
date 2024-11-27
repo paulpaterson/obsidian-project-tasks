@@ -1,5 +1,6 @@
 import {App, Editor, MarkdownFileInfo, Plugin, PluginSettingTab, Setting} from 'obsidian';
-import Helper, {DEFAULT_SETTINGS, NestingBehaviour, PrefixMethod, ProjectTasksSettings} from "./helpers";
+import Helper, {DEFAULT_SETTINGS, Nestingbehavior, PrefixMethod, ProjectTasksSettings} from "./helpers";
+import {editor} from "./test/basic_tests";
 
 // Turn on to allow debugging in the console
 const DEBUG = true;
@@ -18,7 +19,7 @@ export default class ProjectTasks extends Plugin {
             name: "Set project ids on Selection",
             editorCallback: (editor, view) => {
                 let sel = editor.getSelection();
-                let lines = Helper.addTaskIDs(sel, Helper.getPrefix(editor, this.getFilename(view), this.settings), this.settings.automaticTagNames, this.settings.nestedTaskBehavior == NestingBehaviour.ParallelExecution, this.settings.idPrefixMethod == PrefixMethod.UsePrefix, this.settings.randomIDLength, this.settings.sequentialStartNumber);
+                let lines = Helper.addTaskIDs(sel, Helper.getPrefix(editor, this.getFilename(editor, view), this.getFileSettings(editor)), this.getFileSettings(editor).automaticTagNames, this.getFileSettings(editor).nestedTaskBehavior == Nestingbehavior.ParallelExecution, this.getFileSettings(editor).idPrefixMethod == PrefixMethod.UsePrefix, this.getFileSettings(editor).randomIDLength, this.getFileSettings(editor).sequentialStartNumber);
                 editor.replaceSelection(
                     `${lines}`
                 );
@@ -29,7 +30,7 @@ export default class ProjectTasks extends Plugin {
             id: "set-ids-block",
             name: "Set project ids on Block",
             editorCallback: (editor, view) => {
-                Helper.blockUpdate(editor, this.getFilename(view), true, this.settings);
+                Helper.blockUpdate(editor, this.getFilename(editor, view), true, this.getFileSettings(editor));
             }
         })
 
@@ -37,7 +38,7 @@ export default class ProjectTasks extends Plugin {
             id: "set-ids-file",
             name: "Set project ids on entire file",
             editorCallback: (editor, view) => {
-                Helper.addIDsToFile(editor, this.getFilename(view), this.settings);
+                Helper.addIDsToFile(editor, this.getFilename(editor, view), this.getFileSettings(editor));
             }
         })
 
@@ -55,7 +56,7 @@ export default class ProjectTasks extends Plugin {
             name: "Clear project ids on Selection",
             editorCallback: (editor, view) => {
                 let sel = editor.getSelection();
-                let lines = Helper.clearBlockIDs(sel, this.settings.automaticTagNames, this.settings.clearAllTags);
+                let lines = Helper.clearBlockIDs(sel, this.getFileSettings(editor).automaticTagNames, this.getFileSettings(editor).clearAllTags);
                 editor.replaceSelection(
                     `${lines}`
                 );
@@ -66,7 +67,7 @@ export default class ProjectTasks extends Plugin {
             id: "clear-ids-block",
             name: "Clear project ids on Block",
             editorCallback: (editor, view) => {
-                Helper.blockUpdate(editor, this.getFilename(view), false, this.settings);
+                Helper.blockUpdate(editor, this.getFilename(editor, view), false, this.getFileSettings(editor));
             }
         })
 
@@ -74,16 +75,9 @@ export default class ProjectTasks extends Plugin {
             id: "clear-ids-file",
             name: "Clear project ids in entire file",
             editorCallback: (editor, view) => {
-                let last_line = editor.lineCount()
-                let range_from = {line: 0, ch: 0}
-                let range_to = {line: last_line, ch: editor.getLine(last_line).length}
-                let sel = editor.getRange(range_from, range_to);
-                let lines = Helper.clearBlockIDs(sel, this.settings.automaticTagNames, this.settings.clearAllTags);
-                editor.replaceRange(
-                    `${lines}`,
-                    range_from,
-                    range_to
-                );
+                let sel = editor.getValue();
+                let lines = Helper.clearBlockIDs(sel, this.getFileSettings(editor).automaticTagNames, this.getFileSettings(editor).clearAllTags);
+                editor.setValue(lines);
             }
         })
 
@@ -95,7 +89,7 @@ export default class ProjectTasks extends Plugin {
     addActiveProjectList(editor: Editor) {
         // A view to show active tasks
         const active_tasks_view = `\`\`\`tasks
-tags includes #${this.settings.automaticTagNames}
+tags includes #${this.getFileSettings(editor).automaticTagNames}
 not done
 hide backlink
 is not blocked
@@ -103,11 +97,20 @@ is not blocked
         editor.replaceSelection(active_tasks_view);
     }
 
+    getFileSettings(editor: Editor) {
+        // Returns the local settings for the file
+        // This is the main settings for the plug in plus any override from the 
+        // file front matter
+        if (this.settings.overrideSettings) {
+            return Helper.getSettingsFromFrontMatter(editor, this.settings);
+        } else {
+            return this.settings;
+        }
+    }
 
-
-    getFilename(view: MarkdownFileInfo) {
+    getFilename(editor: Editor, view: MarkdownFileInfo) {
         if (!view.file?.name) {
-            return this.settings.projectPrefix;
+            return this.getFileSettings(editor).projectPrefix;
         } else {
             return view.file.name.split('.')[0];
         }
@@ -147,9 +150,9 @@ class ProjectTasksSettingsTab extends PluginSettingTab {
                 dropDown.addOption('1', 'Use prefix');
                 dropDown.addOption('2', 'Use Section name');
                 dropDown.addOption('3', 'Use filename')
-                    .setValue(this.plugin.settings.idPrefixMethod)
+                    .setValue(this.plugin.settings.idPrefixMethod.toString())
                     .onChange(async (value) => {
-                        this.plugin.settings.idPrefixMethod = value as PrefixMethod;
+                        this.plugin.settings.idPrefixMethod = parseInt(value) as PrefixMethod;
                         await this.plugin.saveSettings();
                     })
             });
@@ -235,19 +238,27 @@ class ProjectTasksSettingsTab extends PluginSettingTab {
                 }));
 
         new Setting(containerEl)
-            .setName('Nested tags behaviour')
+            .setName('Nested tags behavior')
             .setDesc('Determines whether nested tags will create parallel execution tags or sequential')
             .addDropdown(dropDown => {
                 dropDown.addOption('1', 'Parallel Execution');
                 dropDown.addOption('2', 'Sequential Execution')
-                    .setValue(this.plugin.settings.nestedTaskBehavior)
+                    .setValue(this.plugin.settings.nestedTaskBehavior.toString())
                     .onChange(async (value) => {
-                        this.plugin.settings.nestedTaskBehavior = value as NestingBehaviour;
+                        this.plugin.settings.nestedTaskBehavior = parseInt(value) as Nestingbehavior;
                         await this.plugin.saveSettings();
                     })
             });
 
-
+        new Setting(containerEl)
+            .setName('Override settings from file front matter')
+            .setDesc('Allow overriding the plugin main settings by reading values from the front matter')
+            .addToggle(text => text
+                .setValue(this.plugin.settings.overrideSettings)
+                .onChange(async (value) => {
+                    this.plugin.settings.overrideSettings = value;
+                    await this.plugin.saveSettings();
+                }));
 
     }
 }

@@ -1,5 +1,5 @@
 {
-  "idPrefixMethod": "2",
+  "idPrefixMethod": 2,
   "projectPrefix": "prj",
   "randomIDLength": 3,
   "sequentialStartNumber": 0,
@@ -10,5 +10,6 @@
     "Help/Others"
   ],
   "clearAllTags": true,
-  "nestedTaskBehavior": "1"
+  "nestedTaskBehavior": 1,
+  "overrideSettings": true
 }

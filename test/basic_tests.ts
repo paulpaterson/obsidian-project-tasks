@@ -1,4 +1,4 @@
-import Helper, {DEFAULT_SETTINGS, PrefixMethod, ProjectTasksSettings} from "../helpers";
+import Helper, {DEFAULT_SETTINGS, Nestingbehavior, PrefixMethod, ProjectTasksSettings} from "../helpers";
 
 let H = Helper;
 export let file: string[] = [];
@@ -59,6 +59,14 @@ class MockEditor {
 
   setCursor(cursor: {line: number, ch: number}) {
     this.cursor = new MockCursor(cursor.line);
+  }
+
+  getValue() {
+    return this.lines.join('\n');
+  }
+  
+  setValue(text: string) {
+    this.lines = text.split(/\r?\n/);
   }
 }
 
@@ -563,7 +571,7 @@ describe('testing for adding ids to a single block in a file', () => {
   test('in pre section block', () => {
     let ed = getEditor(TEST_FILE_1, 0);
     H.blockUpdate(ed, 'The Filename', true, test_settings);
-    let result = ed.lines.join('\n');
+    let result = ed.getValue();
     expect(result)
         .toBe(
         '- [ ] one 🆔 TF0\n' +
@@ -581,7 +589,7 @@ describe('testing for adding ids to a single block in a file', () => {
   test('in section one', () => {
     let ed = getEditor(TEST_FILE_1, 3);
     H.blockUpdate(ed, 'The Filename', true, test_settings);
-    let result = ed.lines.join('\n');
+    let result = ed.getValue();
     expect(result)
         .toBe(
         '- [ ] one\n' +
@@ -599,7 +607,7 @@ describe('testing for adding ids to a single block in a file', () => {
   test('in section two', () => {
     let ed = getEditor(TEST_FILE_1, 6);
     H.blockUpdate(ed, 'The Filename', true, test_settings);
-    let result = ed.lines.join('\n');
+    let result = ed.getValue();
     expect(result)
         .toBe(
         '- [ ] one\n' +
@@ -625,7 +633,7 @@ describe('testing for adding ids to all blocks in a file', () => {
   test('file with using section as prefix', () => {
     let editor = getEditor(TEST_FILE_1, 0);
     H.addIDsToFile(editor, 'The Filename', test_settings);
-    expect(editor.lines.join('\n'))
+    expect(editor.getValue())
         .toBe(
         '- [ ] one 🆔 TF0\n' +
         '- [ ] two 🆔 TF1 ⛔ TF0\n' +
@@ -750,6 +758,55 @@ describe('testing of the getPrefix logic', () => {
         .toBe('ST');
     expect(H.getPrefix(editor.atLine(4), 'The File Name', getSettings({idPrefixMethod: PrefixMethod.SectionName, firstLettersOfWords: true})))
         .toBe('SF');
+  })
+})
+
+describe('update settings from front matter', () => {
+  test('empty front matter doesn\'t change settings', () => {
+    expect(H.getSettingsFromFrontMatter(getEditor(TEST_FILE_1, 0), getSettings({})))
+        .toStrictEqual(getSettings({}));
+  })
+
+  test('all settings from front matter', () => {
+    let editor = getEditor([
+        '---',
+        'idPrefixMethod: 2',
+        'projectPrefix: NewProject',
+        'randomIDLength: 10',
+        'sequentialStartNumber: 5',
+        'removeVowels: true',
+        'firstLettersOfWords: true',
+        'automaticTagNames:',
+        ' - one',
+        ' - two',
+        'clearAllTags: true',
+        'nestedTaskBehavior: 2',
+        '---',
+        'This is a line'
+    ], 0);
+    let expected_settings = getSettings({
+      idPrefixMethod: PrefixMethod.SectionName,
+      projectPrefix: 'NewProject',
+      randomIDLength: 10,
+      sequentialStartNumber: 5,
+      removeVowels: true,
+      firstLettersOfWords: true,
+      automaticTagNames: ['one', 'two'],
+      clearAllTags: true,
+      nestedTaskBehavior: Nestingbehavior.SequentialExecution
+    });
+    expect(H.getSettingsFromFrontMatter(editor, getSettings({})))
+        .toStrictEqual(expected_settings);
+  })
+
+  test('front matter with other properties should be OK', () => {
+    expect(H.getSettingsFromFrontMatter(getEditor([
+        '---',
+        'extra_bit: 10',
+        '---',
+        'the main file'
+    ], 0), getSettings({})))
+        .toStrictEqual(getSettings({}));
   })
 })
 

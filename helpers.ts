@@ -2,19 +2,21 @@
 // ToDo document clear all tags
 // ToDo document adding multiple tags
 
+let matter = require("gray-matter");
+
 const BLOCK_BOUNDARY = /^#+\s/;
 const DEBUG = true;
 
 
 export enum PrefixMethod {
-    UsePrefix = '1',
-    SectionName = '2',
-    FileName = '3'
+    UsePrefix = 1,
+    SectionName = 2,
+    FileName = 3
 }
 
-export enum NestingBehaviour {
-    ParallelExecution = '1',
-    SequentialExecution = '2',
+export enum Nestingbehavior {
+    ParallelExecution = 1,
+    SequentialExecution = 2,
 }
 
 export interface ProjectTasksSettings {
@@ -26,7 +28,8 @@ export interface ProjectTasksSettings {
     firstLettersOfWords: boolean;
     automaticTagNames: string[];
     clearAllTags: boolean;
-    nestedTaskBehavior: NestingBehaviour;
+    nestedTaskBehavior: Nestingbehavior;
+    overrideSettings: boolean;
 }
 
 export const DEFAULT_SETTINGS: ProjectTasksSettings = {
@@ -38,7 +41,8 @@ export const DEFAULT_SETTINGS: ProjectTasksSettings = {
     firstLettersOfWords: false,
     automaticTagNames: ["Project"],
     clearAllTags: false,
-    nestedTaskBehavior: NestingBehaviour.ParallelExecution,
+    nestedTaskBehavior: Nestingbehavior.ParallelExecution,
+    overrideSettings: true,
 }
 
 interface SimpleCursor {
@@ -54,6 +58,8 @@ interface SimpleEditor {
     getRange(start: {line: number, ch: number}, end: {line: number, ch: number}): string;
     replaceRange(text: string, start: {line: number, ch: number}, end: {line: number, ch: number}): void;
     setCursor(cursor: {line: number, ch: number}): void;
+    getValue(): string;
+    setValue(text: string): void;
 }
 
 
@@ -313,7 +319,7 @@ export default class Helper {
         let lines;
         if (add_ids) {
             lines = Helper.addTaskIDs(blockContent, prefix, settings.automaticTagNames,
-                settings.nestedTaskBehavior == NestingBehaviour.ParallelExecution,
+                settings.nestedTaskBehavior == Nestingbehavior.ParallelExecution,
                 settings.idPrefixMethod == PrefixMethod.UsePrefix,
                 settings.randomIDLength, settings.sequentialStartNumber)
         } else {
@@ -394,5 +400,18 @@ export default class Helper {
         // Remove spaces
         text = text.replaceAll(' ', '');
         return text;
+    }
+
+    static getSettingsFromFrontMatter(editor: SimpleEditor, settings: ProjectTasksSettings) {
+        // Get the entire text of the file
+        let text = editor.getValue();
+        let front_matter = matter(text);
+        // Remove any bits of front matter that are not relevant
+        for (const key in front_matter.data) {
+            if (!settings.hasOwnProperty(key)) {
+                delete front_matter.data[key];
+            }
+        }
+        return {...settings, ...front_matter.data};
     }
 }
