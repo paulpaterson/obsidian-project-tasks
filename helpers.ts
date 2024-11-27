@@ -183,7 +183,7 @@ export default class Helper {
     static getAllBlockStarts(editor: SimpleEditor) {
         // Return all the lines that mark the start of a block in a file
         let blocks = [0];
-        let section = /^#?\s\w+/
+        let section = /^#?#*\s\w+/
         for (let line_number = 0; line_number < editor.lineCount(); line_number++) {
             if (section.test(editor.getLine(line_number))) {
                 // Special case when the first line is a section we don't have to add it
@@ -323,7 +323,7 @@ export default class Helper {
         editor.replaceRange(lines, {line: blockStart, ch: 0}, {line: blockEnd, ch: last_line_length});
     }
 
-    static getEntireConvertedFile(editor: SimpleEditor, filename: string, settings: ProjectTasksSettings) {
+    static addIDsToFile(editor: SimpleEditor, filename: string, settings: ProjectTasksSettings) {
         let initial_cursor = editor.getCursor()
         for (let block_start of this.getAllBlockStarts(editor)) {
             editor.setCursor({line: block_start, ch: 0});

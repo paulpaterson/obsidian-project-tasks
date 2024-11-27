@@ -547,6 +547,10 @@ describe('testing getting all the blocks in a file', () =>  {
         .toStrictEqual([0, 1, 3, 5, 6])
   })
 
+  test('file with multiple sections with different levels of heading', () => {
+    expect(H.getAllBlockStarts(getEditor(['one', '## two', 'three', '### four', 'five', '#### six', '# seven'],0)))
+        .toStrictEqual([0, 1, 3, 5, 6])
+  })
 })
 
 describe('testing for adding ids to a single block in a file', () => {
@@ -620,7 +624,7 @@ describe('testing for adding ids to all blocks in a file', () => {
   })
   test('file with using section as prefix', () => {
     let editor = getEditor(TEST_FILE_1, 0);
-    H.getEntireConvertedFile(editor, 'The Filename', test_settings);
+    H.addIDsToFile(editor, 'The Filename', test_settings);
     expect(editor.lines.join('\n'))
         .toBe(
         '- [ ] one 🆔 TF0\n' +

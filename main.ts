@@ -33,6 +33,14 @@ export default class ProjectTasks extends Plugin {
             }
         })
 
+        this.addCommand({
+            id: "set-ids-file",
+            name: "Set project ids on entire file",
+            editorCallback: (editor, view) => {
+                Helper.addIDsToFile(editor, this.getFilename(view), this.settings);
+            }
+        })
+
 
         this.addCommand({
             id: "add-project-task-list",
