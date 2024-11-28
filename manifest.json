@@ -1,11 +1,11 @@
 {
 	"id": "project-tasks",
 	"name": "Project Tasks",
-	"version": "0.1.2",
+	"version": "0.1.3",
 	"minAppVersion": "0.15.0",
 	"description": "Enhances task management for simple projects",
 	"author": "Paul Paterson",
-	"authorUrl": "https://github.com/paulpaterson/obsidian-project-tasks",
+	"authorUrl": "https://github.com/paulpaterson",
 	"fundingUrl": "",
 	"isDesktopOnly": false
 }
