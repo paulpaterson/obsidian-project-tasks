@@ -5,11 +5,8 @@
   "sequentialStartNumber": 0,
   "removeVowels": true,
   "firstLettersOfWords": true,
-  "automaticTagNames": [
-    "Project",
-    "Improvements"
-  ],
-  "clearAllTags": true,
+  "automaticTagNames": [],
+  "clearAllTags": false,
   "nestedTaskBehavior": 1,
   "overrideSettings": true
 }
