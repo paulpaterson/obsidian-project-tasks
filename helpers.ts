@@ -1,6 +1,3 @@
-// ToDo document set-ids-file
-// ToDo document clear all tags
-// ToDo document adding multiple tags
 
 let matter = require("gray-matter");
 

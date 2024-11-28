@@ -6,8 +6,8 @@
   "removeVowels": true,
   "firstLettersOfWords": true,
   "automaticTagNames": [
-    "Act/Project",
-    "Help/Others"
+    "Project",
+    "Improvements"
   ],
   "clearAllTags": true,
   "nestedTaskBehavior": 1,

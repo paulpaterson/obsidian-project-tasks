@@ -48,7 +48,7 @@ For a general description of how dependencies work, see the [Tasks documentation
 
 There are two core commands and a number of variants that adjust the scope of the "project".
 
-### Add Task ID's
+### Set Task ID's
 
 Adds task ID's and dependencies (before and after links) to a series of tasks. This makes the tasks behave as a sequential list. Each task is blocked until the task before it is completed.
 
@@ -153,10 +153,48 @@ When using the section or file name option for the prefix then some other option
 1. Remove vowels - lower case vowels are removed from the prefix
 2. First letters of words - the prefix is split into words and the first letters are used. The letters are capitalized
 
-### Adding a project tag
+### Automatically Adding Project tags
 
-You can use the project tag option to automatically add a tag to all tasks in the project. This allows you to use [Project Views](#project-views).
+You can use the **Automatically add tags** option to automatically add one or more tags to all tasks in the project. This allows you to use [Project Views](#project-views) of other searching and filtering in Obsidian to see your project tasks.
 
-The tag will be added to all tags and will be cleared if you use the ```clear-ids``` command.
+The tags will be added to all tags and will be cleared if you use the ```clear-ids``` command.
+
+![](docs/automatic-tags.png)
+
+You can enter multiple tags, one per line, in the options dialog. You do not need to enter the "#" sign, this will be added automatically.
+
+![](docs/automatically-adding-tags.gif)
+
+### Clear All Tags
+
+The [Automatically add tags](#Automatically Adding Project tags) option allows you to add ID's to a set of tasks. 
+
+By default when you do perform a [Clear Task ID's](#Clear Task ID's) then only these tags will be removed. If you had manually added tags to the tasks then these will be retained. 
+
+By setting the **Clear All Tags** option then *all* tags will be removed from project tasks (and replaced with the automatic tags if you specified this). This will remove any manually added tags.
+
+This option is useful if you have changed the list of automatic tags because then you can clear the old automatic tags.
+
+### Using Front Matter
+
+All of the options that you can set in the options dialog can also be set at a file level by putting the option values in the front matter of the file and setting the **Override Settings** option. 
+
+When the **Override Settings** option is set then the options in the front matter will override whatever is set in the main dialog options. This allows you to override one or many of the options to create a custom set of options for a file.
+
+You can use this, for instance, to create *Project Specific* settings at the file level.
+
+It is important to use the internal name **and type** of the settings. These are shown in the table below.
+
+| Option                  | Internal Name | Type | Description                                                                                |
+|-------------------------|---------------|------|--------------------------------------------------------------------------------------------|
+| Prefix Method           |idPrefixMethod| **Number**| 1=Use Prefix, 2=Use Section name, 3=Use Filename                                           |
+| Project Prefix          |projectPrefix| **String**| Sets the prefix to use when Prefix Method is set to "Use Prefix"                           |
+| Random ID Length        |randomIDLength| **Number**| The length of the random number to use when Prefix Method is set to "Use Prefix"           |
+| Sequential Start Number |sequentialStartNumber| **Number**| The initial number for the ID when Prefix Method is Section or Filename                    |
+| Remove Vowels           |removeVowels| **Boolean**|  Whether lower case vowels are removed from the ID prefix                                  |
+| First Letters of Words  |firstLettersOfWords| **Boolean**| Whether only the first letters of words in the prefix are used                             |
+| Automatic Tag Names     |automaticTagNames| **List of Strings**| The set of tag names to add to project tasks                                               |
+| Clear All Tags          |clearAllTags| **Boolean**| Whether to clear all tags, or just the "autoamtic" tags, from tasks when clearing the ID's |
+| Nested Tag Behavior     |nestedTaskBehavior| **Number**| 1=Nested tasks run in parallel, 2=Nested tasks run sequentially                            |
 
 
