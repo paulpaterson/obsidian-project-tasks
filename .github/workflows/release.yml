@@ -31,4 +31,4 @@ jobs:
           gh release create "$tag" \
             --title="$tag" \
             --draft \
-            main.ts manifest.json styles.css
+            main.js manifest.json
