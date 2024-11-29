@@ -3,7 +3,7 @@ import Helper, {DEFAULT_SETTINGS, Nestingbehavior, PrefixMethod, ProjectTasksSet
 import {editor} from "./test/basic_tests";
 
 // Turn on to allow debugging in the console
-const DEBUG = true;
+const DEBUG = false;
 
 
 export default class ProjectTasks extends Plugin {
