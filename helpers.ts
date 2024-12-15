@@ -1,3 +1,4 @@
+import {Editor} from "obsidian";
 
 let matter = require("gray-matter");
 
@@ -54,6 +55,7 @@ interface SimpleEditor {
     lineCount(): number;
     getRange(start: {line: number, ch: number}, end: {line: number, ch: number}): string;
     replaceRange(text: string, start: {line: number, ch: number}, end: {line: number, ch: number}): void;
+    replaceSelection(text: string): void;
     setCursor(cursor: {line: number, ch: number}): void;
     getValue(): string;
     setValue(text: string): void;
@@ -410,5 +412,20 @@ export default class Helper {
             }
         }
         return {...settings, ...front_matter.data};
+    }
+
+    static addActiveProjectList(editor: SimpleEditor, settings: ProjectTasksSettings) {
+        // Add a view to show active tasks
+        let tag_parts = "";
+        for (const tag_name of settings.automaticTagNames) {
+            tag_parts += `tags includes #${tag_name}\n`;
+        }
+        const active_tasks_view = `\`\`\`tasks
+${tag_parts}
+not done
+hide backlink
+is not blocked
+\`\`\``;
+        editor.replaceSelection(active_tasks_view);
     }
 }

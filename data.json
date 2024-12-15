@@ -5,8 +5,11 @@
   "sequentialStartNumber": 0,
   "removeVowels": true,
   "firstLettersOfWords": true,
-  "automaticTagNames": [],
-  "clearAllTags": false,
+  "automaticTagNames": [
+    "Act/Project",
+    "Christmas"
+  ],
+  "clearAllTags": true,
   "nestedTaskBehavior": 1,
-  "overrideSettings": true
+  "overrideSettings": false
 }

@@ -47,7 +47,7 @@ export default class ProjectTasks extends Plugin {
             id: "add-project-task-list",
             name: "Add active project task list",
             editorCallback: (editor, view) => {
-                this.addActiveProjectList(editor);
+                Helper.addActiveProjectList(editor, this.getFileSettings(editor));
             }
         })
 
@@ -84,17 +84,6 @@ export default class ProjectTasks extends Plugin {
         // This adds a settings tab so the user can configure various aspects of the plugin
         this.addSettingTab(new ProjectTasksSettingsTab(this.app, this));
 
-    }
-
-    addActiveProjectList(editor: Editor) {
-        // A view to show active tasks
-        const active_tasks_view = `\`\`\`tasks
-tags includes #${this.getFileSettings(editor).automaticTagNames}
-not done
-hide backlink
-is not blocked
-\`\`\``;
-        editor.replaceSelection(active_tasks_view);
     }
 
     getFileSettings(editor: Editor) {
