@@ -52,6 +52,10 @@ class MockEditor {
     }
   }
 
+  replaceSelection(text: string) {
+    this.replaceRange(text, this.getCursor(), new MockCursor(this.lineCount() + 1));
+  }
+
   atLine(line: number) {
     this.cursor.line = line;
     return this;
@@ -807,6 +811,25 @@ describe('update settings from front matter', () => {
         'the main file'
     ], 0), getSettings({})))
         .toStrictEqual(getSettings({}));
+  })
+})
+
+describe('adding active project list', () => {
+  test('can add active project list', () => {
+    let e = getEditor([], 0);
+    let s = getSettings({automaticTagNames: ["Project"]});
+    H.addActiveProjectList(e, s);
+    expect(e.getLine(0)).toBe("``````tasks");
+    expect(e.getLine(1)).toBe("tags includes #Project");
+  })
+
+  test('can add active project list with multiple tags', () => {
+    let e = getEditor([], 0);
+    let s = getSettings({automaticTagNames: ["Project", "Other"]});
+    H.addActiveProjectList(e, s);
+    expect(e.getLine(0)).toBe("``````tasks");
+    expect(e.getLine(1)).toBe("tags includes #Project");
+    expect(e.getLine(2)).toBe("tags includes #Other");
   })
 })
 
