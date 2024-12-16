@@ -3,7 +3,7 @@ import {Editor} from "obsidian";
 let matter = require("gray-matter");
 
 const BLOCK_BOUNDARY = /^#+\s/;
-const DEBUG = true;
+export const DEBUG = false;
 
 
 export enum PrefixMethod {

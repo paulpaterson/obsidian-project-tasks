@@ -1,9 +1,7 @@
 import {App, Editor, MarkdownFileInfo, Plugin, PluginSettingTab, Setting} from 'obsidian';
-import Helper, {DEFAULT_SETTINGS, Nestingbehavior, PrefixMethod, ProjectTasksSettings} from "./helpers";
+import Helper, {DEFAULT_SETTINGS, Nestingbehavior, PrefixMethod, ProjectTasksSettings, DEBUG} from "./helpers";
 import {editor} from "./test/basic_tests";
 
-// Turn on to allow debugging in the console
-const DEBUG = false;
 
 
 export default class ProjectTasks extends Plugin {

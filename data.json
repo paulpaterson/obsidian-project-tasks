@@ -1,15 +1,1 @@
-{
-  "idPrefixMethod": 2,
-  "projectPrefix": "prj",
-  "randomIDLength": 3,
-  "sequentialStartNumber": 0,
-  "removeVowels": true,
-  "firstLettersOfWords": true,
-  "automaticTagNames": [
-    "Act/Project",
-    "Christmas"
-  ],
-  "clearAllTags": true,
-  "nestedTaskBehavior": 1,
-  "overrideSettings": false
-}
+{}
