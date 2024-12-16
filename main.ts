@@ -208,7 +208,7 @@ class ProjectTasksSettingsTab extends PluginSettingTab {
             .addTextArea((text) => {
                 text.setValue(this.plugin.settings.automaticTagNames.join('\n'))
                     .onChange((value) => {
-                        this.plugin.settings.automaticTagNames = value.split('\n').filter(line => line.trim() !== '');
+                        this.plugin.settings.automaticTagNames = value.replaceAll('#', '').split('\n').filter(line => line.trim() !== '');
                         this.plugin.saveSettings();
                     }).then(textArea => {
                     textArea.inputEl.style.width = "100%";
