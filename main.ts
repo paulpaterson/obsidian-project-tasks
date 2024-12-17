@@ -217,13 +217,13 @@ class ProjectTasksSettingsTab extends PluginSettingTab {
             .setName('Automatically add tags')
             .setDesc('A list of tags (one per line) to add to each task - do not include the # symbol')
             .addTextArea((text) => {
+                text.inputEl.setAttr("rows", 5);
+                text.inputEl.addClass("settings_area");
                 text.setValue(this.plugin.settings.automaticTagNames.join('\n'))
                     .onChange((value) => {
                         this.plugin.settings.automaticTagNames = value.split('\n').filter(line => line.trim() !== '');
                         this.plugin.saveSettings();
                     }).then(textArea => {
-                    textArea.inputEl.style.width = "100%";
-                    textArea.inputEl.rows = 5;
                 });
             });
 
