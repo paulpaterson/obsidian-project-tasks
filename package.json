@@ -1,6 +1,6 @@
 {
 	"name": "project-tasks",
-	"version": "0.1.3",
+	"version": "0.2",
 	"description": "The plugin to help with project tasks",
 	"main": "main.js",
 	"scripts": {
