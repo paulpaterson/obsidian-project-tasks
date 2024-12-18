@@ -16,7 +16,7 @@ export default class ProjectTasks extends Plugin {
 
         this.addCommand({
             id: "set-ids",
-            name: "Set project ids on Selection",
+            name: "Set project ids on selection",
             editorCallback: (editor, view) => {
                 let sel = editor.getSelection();
                 let lines = Helper.addTaskIDs(sel, Helper.getPrefix(editor, this.getFilename(editor, view), this.getFileSettings(editor)), this.getFileSettings(editor).automaticTagNames, this.getFileSettings(editor).nestedTaskBehavior == Nestingbehavior.ParallelExecution, this.getFileSettings(editor).idPrefixMethod == PrefixMethod.UsePrefix, this.getFileSettings(editor).randomIDLength, this.getFileSettings(editor).sequentialStartNumber);
@@ -28,7 +28,7 @@ export default class ProjectTasks extends Plugin {
 
         this.addCommand({
             id: "set-ids-block",
-            name: "Set project ids on Block",
+            name: "Set project ids on block",
             editorCallback: (editor, view) => {
                 Helper.blockUpdate(editor, this.getFilename(editor, view), true, this.getFileSettings(editor));
             }
@@ -53,7 +53,7 @@ export default class ProjectTasks extends Plugin {
 
         this.addCommand({
             id: "clear-ids",
-            name: "Clear project ids on Selection",
+            name: "Clear project ids on selection",
             editorCallback: (editor, view) => {
                 let sel = editor.getSelection();
                 let lines = Helper.clearBlockIDs(sel, this.getFileSettings(editor).automaticTagNames, this.getFileSettings(editor).clearAllTags);
@@ -65,7 +65,7 @@ export default class ProjectTasks extends Plugin {
 
         this.addCommand({
             id: "clear-ids-block",
-            name: "Clear project ids on Block",
+            name: "Clear project ids on block",
             editorCallback: (editor, view) => {
                 Helper.blockUpdate(editor, this.getFilename(editor, view), false, this.getFileSettings(editor));
             }
