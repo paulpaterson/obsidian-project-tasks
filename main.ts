@@ -2,6 +2,10 @@ import {App, Editor, MarkdownFileInfo, Plugin, PluginSettingTab, Setting} from '
 import Helper, {DEFAULT_SETTINGS, Nestingbehavior, PrefixMethod, ProjectTasksSettings, DEBUG} from "./helpers";
 import {editor} from "./test/basic_tests";
 
+/*
+A plugin for Obsidian that implements a simple project-like
+interface on top of tasks to help manage dependencies.
+ */
 
 
 export default class ProjectTasks extends Plugin {

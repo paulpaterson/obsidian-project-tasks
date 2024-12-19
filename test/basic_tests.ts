@@ -831,5 +831,13 @@ describe('adding active project list', () => {
     expect(e.getLine(1)).toBe("tags includes #Project");
     expect(e.getLine(2)).toBe("tags includes #Other");
   })
+
+  test('active project list with no automatic tags works', () => {
+    let e = getEditor([], 0);
+    let s = getSettings({automaticTagNames: []});
+    H.addActiveProjectList(e, s);
+    expect(e.getLine(0)).toBe("``````tasks");
+    expect(e.getLine(1)).toBe("");
+  })
 })
 
