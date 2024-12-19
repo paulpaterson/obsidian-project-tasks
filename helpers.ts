@@ -24,6 +24,7 @@ export interface ProjectTasksSettings {
     sequentialStartNumber: number;
     removeVowels: boolean;
     firstLettersOfWords: boolean;
+    fileLevelTags: string[],
     automaticTagNames: string[];
     clearAllTags: boolean;
     nestedTaskBehavior: Nestingbehavior;
@@ -37,6 +38,7 @@ export const DEFAULT_SETTINGS: ProjectTasksSettings = {
     sequentialStartNumber: 1,
     removeVowels: false,
     firstLettersOfWords: false,
+    fileLevelTags: [],
     automaticTagNames: ["Project"],
     clearAllTags: false,
     nestedTaskBehavior: Nestingbehavior.ParallelExecution,
@@ -419,6 +421,9 @@ export default class Helper {
         let tag_parts = "";
         for (const tag_name of settings.automaticTagNames) {
             tag_parts += `tags includes #${tag_name}\n`;
+        }
+        for (const tag_name of settings.fileLevelTags) {
+            tag_parts += `filter by function task.file.tags.includes("#${tag_name}")\n`;
         }
         const active_tasks_view = `\`\`\`tasks
 ${tag_parts}

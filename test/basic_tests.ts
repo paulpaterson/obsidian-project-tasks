@@ -839,5 +839,15 @@ describe('adding active project list', () => {
     expect(e.getLine(0)).toBe("``````tasks");
     expect(e.getLine(1)).toBe("");
   })
+
+  test('active project list with file level tags', () => {
+    let e = getEditor([], 0);
+    let s = getSettings({automaticTagNames: ['Project'], fileLevelTags: ['Active', 'Critical']});
+    H.addActiveProjectList(e, s);
+    expect(e.getLine(0)).toBe("``````tasks");
+    expect(e.getLine(1)).toBe("tags includes #Project");
+    expect(e.getLine(2)).toBe("filter by function task.file.tags.includes(\"#Active\")");
+    expect(e.getLine(3)).toBe("filter by function task.file.tags.includes(\"#Critical\")");
+  })
 })
 
