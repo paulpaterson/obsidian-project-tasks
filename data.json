@@ -1,1 +1,15 @@
-{}
+{
+  "idPrefixMethod": 1,
+  "projectPrefix": "prj",
+  "randomIDLength": 6,
+  "sequentialStartNumber": 1,
+  "removeVowels": false,
+  "firstLettersOfWords": false,
+  "fileLevelTags": [],
+  "automaticTagNames": [
+    "Project"
+  ],
+  "clearAllTags": false,
+  "nestedTaskBehavior": 1,
+  "overrideSettings": true
+}

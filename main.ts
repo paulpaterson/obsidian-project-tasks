@@ -203,6 +203,20 @@ class ProjectTasksSettingsTab extends PluginSettingTab {
                     await this.plugin.saveSettings();
                 }));
 
+        // TODO: Document the file level tags option
+        new Setting(containerEl)
+            .setName('Use file level tags to identify project tasks')
+            .setDesc('A list of tags (one per line) to use to identify project tasks')
+            .addTextArea((text) => {
+                text.setValue(this.plugin.settings.fileLevelTags.join('\n'))
+                    .onChange((value) => {
+                        this.plugin.settings.fileLevelTags = value.replaceAll('#', '').split('\n').filter(line => line.trim() !== '');
+                        this.plugin.saveSettings();
+                    }).then(textArea => {
+                    textArea.inputEl.style.width = "100%";
+                    textArea.inputEl.rows = 5;
+                });
+            });
 
         new Setting(containerEl)
             .setName('Automatically add tags')
