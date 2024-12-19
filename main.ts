@@ -212,10 +212,9 @@ class ProjectTasksSettingsTab extends PluginSettingTab {
                     .onChange((value) => {
                         this.plugin.settings.fileLevelTags = value.replaceAll('#', '').split('\n').filter(line => line.trim() !== '');
                         this.plugin.saveSettings();
-                    }).then(textArea => {
-                    textArea.inputEl.style.width = "100%";
-                    textArea.inputEl.rows = 5;
-                });
+                    });
+                text.inputEl.setAttr("rows", 5);
+                text.inputEl.addClass("settings_area");
             });
 
         new Setting(containerEl)
@@ -226,10 +225,9 @@ class ProjectTasksSettingsTab extends PluginSettingTab {
                     .onChange((value) => {
                         this.plugin.settings.automaticTagNames = value.replaceAll('#', '').split('\n').filter(line => line.trim() !== '');
                         this.plugin.saveSettings();
-                    }).then(textArea => {
-                    textArea.inputEl.style.width = "100%";
-                    textArea.inputEl.rows = 5;
-                });
+                    });
+                text.inputEl.setAttr("rows", 5);
+                text.inputEl.addClass("settings_area");
             });
 
         new Setting(containerEl)
