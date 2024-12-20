@@ -217,6 +217,20 @@ class ProjectTasksSettingsTab extends PluginSettingTab {
                 text.inputEl.addClass("settings_area");
             });
 
+        // TODO: Document the file level ignore tags option
+        new Setting(containerEl)
+            .setName('File level tags used to identify projects that should be ignored in the project view')
+            .setDesc('A list of tags (one per line) to use to identify projects to ignore in the project report.')
+            .addTextArea((text) => {
+                text.setValue(this.plugin.settings.ignoredFileTags.join('\n'))
+                    .onChange((value) => {
+                        this.plugin.settings.ignoredFileTags = value.replaceAll('#', '').split('\n').filter(line => line.trim() !== '');
+                        this.plugin.saveSettings();
+                    });
+                text.inputEl.setAttr("rows", 5);
+                text.inputEl.addClass("settings_area");
+            });
+
         new Setting(containerEl)
             .setName('Task level tags to identify project tasks')
             .setDesc('A list of tags (one per line) to add to each task - do not include the # symbol.')

@@ -8,6 +8,9 @@
   "fileLevelTags": [
     "Project"
   ],
+  "ignoredFileTags": [
+    "Paused"
+  ],
   "automaticTagNames": [],
   "clearAllTags": true,
   "nestedTaskBehavior": 1,
