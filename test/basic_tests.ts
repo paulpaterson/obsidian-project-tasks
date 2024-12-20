@@ -849,5 +849,20 @@ describe('adding active project list', () => {
     expect(e.getLine(2)).toBe("filter by function task.file.tags.includes(\"#Active\")");
     expect(e.getLine(3)).toBe("filter by function task.file.tags.includes(\"#Critical\")");
   })
+
+  test('active project list can incorporate ignored tags', () => {
+    let e = getEditor([], 0);
+    let s = getSettings({
+      automaticTagNames: ['Project'],
+      fileLevelTags: ['Active'],
+      ignoredFileTags: ['Paused', 'Testing']
+    });
+    H.addActiveProjectList(e, s);
+    expect(e.getLine(0)).toBe("``````tasks");
+    expect(e.getLine(1)).toBe("tags includes #Project");
+    expect(e.getLine(2)).toBe("filter by function task.file.tags.includes(\"#Active\")");
+    expect(e.getLine(3)).toBe("filter by function task.file.tags.includes(\"#Paused\") == false");
+    expect(e.getLine(4)).toBe("filter by function task.file.tags.includes(\"#Testing\") == false");
+  })
 })
 

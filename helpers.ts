@@ -25,6 +25,7 @@ export interface ProjectTasksSettings {
     removeVowels: boolean;
     firstLettersOfWords: boolean;
     fileLevelTags: string[],
+    ignoredFileTags: string[],
     automaticTagNames: string[];
     clearAllTags: boolean;
     nestedTaskBehavior: Nestingbehavior;
@@ -39,6 +40,7 @@ export const DEFAULT_SETTINGS: ProjectTasksSettings = {
     removeVowels: false,
     firstLettersOfWords: false,
     fileLevelTags: [],
+    ignoredFileTags: [],
     automaticTagNames: ["Project"],
     clearAllTags: false,
     nestedTaskBehavior: Nestingbehavior.ParallelExecution,
@@ -424,6 +426,9 @@ export default class Helper {
         }
         for (const tag_name of settings.fileLevelTags) {
             tag_parts += `filter by function task.file.tags.includes("#${tag_name}")\n`;
+        }
+        for (const tag_name of settings.ignoredFileTags) {
+            tag_parts += `filter by function task.file.tags.includes("#${tag_name}") == false\n`;
         }
         const active_tasks_view = `\`\`\`tasks
 ${tag_parts}

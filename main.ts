@@ -205,8 +205,8 @@ class ProjectTasksSettingsTab extends PluginSettingTab {
 
         // TODO: Document the file level tags option
         new Setting(containerEl)
-            .setName('Use file level tags to identify project tasks')
-            .setDesc('A list of tags (one per line) to use to identify project tasks')
+            .setName('File level tags to identify project tasks')
+            .setDesc('A list of tags (one per line) to use to identify project tasks.')
             .addTextArea((text) => {
                 text.setValue(this.plugin.settings.fileLevelTags.join('\n'))
                     .onChange((value) => {
@@ -218,8 +218,8 @@ class ProjectTasksSettingsTab extends PluginSettingTab {
             });
 
         new Setting(containerEl)
-            .setName('Automatically add tags')
-            .setDesc('A list of tags (one per line) to add to each task - do not include the # symbol')
+            .setName('Task level tags to identify project tasks')
+            .setDesc('A list of tags (one per line) to add to each task - do not include the # symbol.')
             .addTextArea((text) => {
                 text.setValue(this.plugin.settings.automaticTagNames.join('\n'))
                     .onChange((value) => {
@@ -241,8 +241,8 @@ class ProjectTasksSettingsTab extends PluginSettingTab {
                 }));
 
         new Setting(containerEl)
-            .setName('Nested tags behavior')
-            .setDesc('Determines whether nested tags will create parallel execution tags or sequential')
+            .setName('Nested tasks behavior')
+            .setDesc('Determines whether nested tasks will create parallel execution tasks or sequential')
             .addDropdown(dropDown => {
                 dropDown.addOption('1', 'Parallel Execution');
                 dropDown.addOption('2', 'Sequential Execution')
